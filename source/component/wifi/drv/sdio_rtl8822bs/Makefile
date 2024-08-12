@@ -1,0 +1,4 @@
+obj-y += rtl88x2BS_WiFi_linux_v5.2.21.3_28325.20180614_COEX20180430-5e5e/
+#obj-y += rtl88x2BS_WiFi_linux_v5.2.21.2_27038.20180312_COEX20180112-5959/
+#obj-y += rtl88x2BS_WiFi_linux_v5.1.7.2_23461.20170804_COEX20170619-4141/
+#obj-y += rtl88x2BS_WiFi_linux_v5.1.7.4_24893.20171108_COEX20170619-4141_beta_hs_oob_v2/
