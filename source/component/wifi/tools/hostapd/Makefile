@@ -18,16 +18,18 @@ endif
 ifneq ($(HI_OUT_DIR),)
 BUILD_DIR := $(HI_OUT_DIR)/$(OBJ_NAME)/source/component/wifi/tools/hostapd
 LIBNL_DIR := $(HI_OUT_DIR)/$(OBJ_NAME)/source/component/wifi/tools/libnl/_install
+OPENSSL_DIR := $(HI_OUT_DIR)/$(OBJ_NAME)/source/component/openssl/release
 else
 BUILD_DIR  := $(shell pwd)/tmp
 LIBNL_DIR := $(COMPONENT_DIR)/wifi/tools/libnl/_install
+OPENSSL_DIR := $(COMPONENT_DIR)/openssl/release
 endif
 
 INSTALL_DIR := $(HI_ROOTFS_DIR)/sbin
 HOST := $(HI_KERNEL_TOOLCHAINS_NAME)
 CROSS_COMPILE := $(HOST)-
 
-MODULE_SRC := hostapd_8
+MODULE_SRC := hostapd-2.11
 MODULE := hostapd
 MODULE_PATH := $(BUILD_DIR)/$(MODULE_SRC)/hostapd/hostapd
 
@@ -51,7 +53,7 @@ all: $(BUILD_MODULES)
 	@test -d $(INSTALL_DIR) || mkdir -p $(INSTALL_DIR)
 	@cp -v $(MODULE_PATH) $(INSTALL_DIR)/
 ifeq ($(CFG_HI_WIFI_DEVICE_HI1131C),y)
-	@chmod 777 $(INSTALL_DIR)/hisi_hostapd
+	@chmod a+x $(INSTALL_DIR)/hisi_hostapd
 endif
 
 clean:
@@ -72,12 +74,16 @@ uninstall: $(UNINSTALL_MODULES)
 	cp -fv defconfig .config && \
 	(echo ""; \
 		echo "CONFIG_LIBNL32=y"; \
-		echo "CONFIG_IEEE80211N=y"; \
-		echo "CONFIG_TLS=internal"; \
-		echo "CONFIG_INTERNAL_LIBTOMMATH=y"; \
+		echo "# CONFIG_IEEE80211N=y"; \
+		echo "# CONFIG_TLS=internal"; \
+		echo "# CONFIG_INTERNAL_LIBTOMMATH=y"; \
 		echo "CFLAGS += -I$(LIBNL_DIR)/include/libnl3"; \
 		echo "LIBS += -L$(LIBNL_DIR)/lib"; \
-		echo "LIBS_p += -L$(LIBNL_DIR)/lib") >> .config && \
+		echo "LIBS_p += -L$(LIBNL_DIR)/lib"; \
+		echo "CFLAGS += -I$(OPENSSL_DIR)/include"; \
+		echo "LIBS += -L$(OPENSSL_DIR)/lib"; \
+		echo "LIBS_p += -L$(OPENSSL_DIR)/lib"; ) \
+		>> .config && \
 	make -j 16 CC=$(HOST)-gcc && \
 	cd -
 

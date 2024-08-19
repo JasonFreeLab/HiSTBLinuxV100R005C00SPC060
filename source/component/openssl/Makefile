@@ -10,7 +10,8 @@ endif
 #===============================================================================
 # local variable
 #===============================================================================
-OPENSSL := openssl-1.0.2o
+# OPENSSL := openssl-1.0.2o
+OPENSSL := openssl-3.3.1
 
 OPENSSL_DIR := $(HI_OUT_DIR)/obj/source/component/openssl
 INSTALL_DIR := $(OPENSSL_DIR)/release
@@ -62,10 +63,10 @@ clean:
 	$(AT)rm -rf $(HI_INCLUDE_DIR)/openssl
 
 ssl: $(OPENSSL_DIR)/$(OPENSSL)/tar
-	$(AT)cd $(OPENSSL_DIR)/$(OPENSSL) && make build_engines -i && make build_apps -i && make install_sw -i
+	$(AT)cd $(OPENSSL_DIR)/$(OPENSSL) && make build_sw -i && make build_apps -i && make install_sw -i
 
 sll64: $(OPENSSL_DIR64)/$(OPENSSL)/tar
-	$(AT)cd $(OPENSSL_DIR64)/$(OPENSSL) && make build_engines -i && make build_apps -i && make install_sw -i
+	$(AT)cd $(OPENSSL_DIR64)/$(OPENSSL) && make build_sw -i && make build_apps -i && make install_sw -i
 
 $(OPENSSL_DIR)/$(OPENSSL)/tar:
 	$(AT)test -d $(INSTALL_DIR) || mkdir -p $(INSTALL_DIR)

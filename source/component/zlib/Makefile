@@ -9,7 +9,7 @@ endif
 #===============================================================================
 # local variable
 #===============================================================================
-ZLIB := zlib-1.2.11
+ZLIB := zlib-1.3.1
 
 ZLIB_DIR := $(HI_OUT_DIR)/obj/source/component/zlib
 INSTALL_DIR := $(ZLIB_DIR)/release

@@ -32,11 +32,11 @@ else
 INSTALL_DIR := $(HI_ROOTFS_DIR)/lib
 endif
 
-MODULE_SRC := libnl-3.2.22
-MODULE := libnl-3.so.200.17.0 libnl-3.so.200 libnl-genl-3.so.200.17.0 libnl-genl-3.so.200
-MODULE_PATH := $(BUILD_DIR)/$(MODULE_SRC)/lib/.libs/libnl-3.so.200.17.0 \
+MODULE_SRC := libnl-3.10.0
+MODULE := libnl-3.so.200.26.0 libnl-3.so.200 libnl-genl-3.so.200.26.0 libnl-genl-3.so.200
+MODULE_PATH := $(BUILD_DIR)/$(MODULE_SRC)/lib/.libs/libnl-3.so.200.26.0 \
 	$(BUILD_DIR)/$(MODULE_SRC)/lib/.libs/libnl-3.so.200 \
-	$(BUILD_DIR)/$(MODULE_SRC)/lib/.libs/libnl-genl-3.so.200.17.0 \
+	$(BUILD_DIR)/$(MODULE_SRC)/lib/.libs/libnl-genl-3.so.200.26.0 \
 	$(BUILD_DIR)/$(MODULE_SRC)/lib/.libs/libnl-genl-3.so.200
 
 BUILD_MODULES = $(patsubst %,%_build,${MODULE_SRC})

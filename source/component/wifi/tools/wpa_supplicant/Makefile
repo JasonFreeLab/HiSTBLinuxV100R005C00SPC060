@@ -18,9 +18,11 @@ endif
 ifneq ($(HI_OUT_DIR),)
 BUILD_DIR := $(HI_OUT_DIR)/$(OBJ_NAME)/source/component/wifi/tools/wpa_supplicant
 LIBNL_DIR := $(HI_OUT_DIR)/$(OBJ_NAME)/source/component/wifi/tools/libnl/_install
+OPENSSL_DIR := $(HI_OUT_DIR)/$(OBJ_NAME)/source/component/openssl/release
 else
 BUILD_DIR := $(CURDIR)/tmp
 LIBNL_DIR := $(COMPONENT_DIR)/wifi/tools/libnl/_install
+OPENSSL_DIR := $(COMPONENT_DIR)/openssl/release
 endif
 
 HOST := $(HI_KERNEL_TOOLCHAINS_NAME)
@@ -29,7 +31,7 @@ INSTALL_DIR := $(HI_ROOTFS_DIR)/sbin
 
 WPACONF_INSTALL_DIR := $(HI_ROOTFS_DIR)/etc/Wireless
 
-MODULE_SRC := wpa_supplicant_8
+MODULE_SRC := wpa_supplicant-2.11
 MODULE := wpa_supplicant wpa_cli
 MODULE_PATH := $(BUILD_DIR)/$(MODULE_SRC)/wpa_supplicant/wpa_supplicant \
 	$(BUILD_DIR)/$(MODULE_SRC)/wpa_supplicant/wpa_cli
@@ -84,11 +86,15 @@ uninstall: $(UNINSTALL_MODULES)
 		echo "CONFIG_P2P=y"; \
 		echo "CONFIG_LIBNL32=y"; \
 		echo "CONFIG_IEEE80211N=y"; \
-		echo "CONFIG_TLS=internal"; \
-		echo "CONFIG_INTERNAL_LIBTOMMATH=y"; \
+		echo "# CONFIG_TLS=internal"; \
+		echo "# CONFIG_INTERNAL_LIBTOMMATH=y"; \
 		echo "CFLAGS += -I$(LIBNL_DIR)/include/libnl3"; \
 		echo "LIBS += -L$(LIBNL_DIR)/lib"; \
-		echo "LIBS_p += -L$(LIBNL_DIR)/lib") >> .config && \
+		echo "LIBS_p += -L$(LIBNL_DIR)/lib"; \
+		echo "CFLAGS += -I$(OPENSSL_DIR)/include"; \
+		echo "LIBS += -L$(OPENSSL_DIR)/lib"; \
+		echo "LIBS_p += -L$(OPENSSL_DIR)/lib"; ) \
+		>> .config && \
 	make -j 16 CC=$(HOST)-gcc && \
 	cd -
 
