@@ -93,8 +93,8 @@ uninstall: $(UNINSTALL_MODULES)
 		echo "LIBS_p += -L$(LIBNL_DIR)/lib"; \
 		echo "CFLAGS += -I$(OPENSSL_DIR)/include"; \
 		echo "LIBS += -L$(OPENSSL_DIR)/lib"; \
-		echo "LIBS_p += -L$(OPENSSL_DIR)/lib"; ) \
-		>> .config && \
+		echo "LIBS_p += -L$(OPENSSL_DIR)/lib" \
+		) >> .config && \
 	make -j 16 CC=$(HOST)-gcc && \
 	cd -
 

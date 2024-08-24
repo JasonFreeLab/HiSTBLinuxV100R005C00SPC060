@@ -11,7 +11,7 @@ endif
 # local variable
 #===============================================================================
 # OPENSSL := openssl-1.0.2o
-OPENSSL := openssl-3.3.1
+OPENSSL := openssl-1.1.1w
 
 OPENSSL_DIR := $(HI_OUT_DIR)/obj/source/component/openssl
 INSTALL_DIR := $(OPENSSL_DIR)/release

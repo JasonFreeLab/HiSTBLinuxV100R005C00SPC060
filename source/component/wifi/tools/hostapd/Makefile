@@ -74,7 +74,7 @@ uninstall: $(UNINSTALL_MODULES)
 	cp -fv defconfig .config && \
 	(echo ""; \
 		echo "CONFIG_LIBNL32=y"; \
-		echo "# CONFIG_IEEE80211N=y"; \
+		echo "CONFIG_IEEE80211N=y"; \
 		echo "# CONFIG_TLS=internal"; \
 		echo "# CONFIG_INTERNAL_LIBTOMMATH=y"; \
 		echo "CFLAGS += -I$(LIBNL_DIR)/include/libnl3"; \
@@ -82,8 +82,8 @@ uninstall: $(UNINSTALL_MODULES)
 		echo "LIBS_p += -L$(LIBNL_DIR)/lib"; \
 		echo "CFLAGS += -I$(OPENSSL_DIR)/include"; \
 		echo "LIBS += -L$(OPENSSL_DIR)/lib"; \
-		echo "LIBS_p += -L$(OPENSSL_DIR)/lib"; ) \
-		>> .config && \
+		echo "LIBS_p += -L$(OPENSSL_DIR)/lib"; \
+		) >> .config && \
 	make -j 16 CC=$(HOST)-gcc && \
 	cd -
 
