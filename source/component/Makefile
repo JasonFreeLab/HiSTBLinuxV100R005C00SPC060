@@ -142,6 +142,9 @@ depends_clean := $(addsuffix _clean,$(depends))
 .PHONY: all clean
 
 all: $(depends)
+ifeq ($(CFG_HI_WIFI_SUPPORT),y)
+wifi: openssl
+endif
 
 clean: $(depends_clean)
 

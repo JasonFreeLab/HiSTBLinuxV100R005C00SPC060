@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # SDK version: KERNELVERSION
-# Thu Aug 15 23:38:34 2024
+# Sun Aug 25 15:18:08 2024
 #
 
 #
@@ -1471,6 +1471,12 @@ CFG_HI_WIFI_DEVICE_RTL8822BS=y
 #
 CFG_HI_WIFI_MODE_STA=y
 CFG_HI_WIFI_MODE_AP=y
+
+#
+# WiFi tools
+#
+CFG_HI_WIFI_TOOL_WIRELESS_TOOLS=y
+CFG_HI_WIFI_TOOL_IW=y
 # CFG_HI_BLUETOOTH_SUPPORT is not set
 # CFG_HI_DRM_SUPPORT is not set
 CFG_HI_VP_SUPPORT=y

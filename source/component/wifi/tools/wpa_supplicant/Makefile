@@ -95,6 +95,8 @@ uninstall: $(UNINSTALL_MODULES)
 		echo "LIBS += -L$(OPENSSL_DIR)/lib"; \
 		echo "LIBS_p += -L$(OPENSSL_DIR)/lib" \
 		) >> .config && \
+	sed -i "s/CONFIG_CTRL_IFACE_DBUS_NEW=y/# CONFIG_CTRL_IFACE_DBUS_NEW=y/g" .config && \
+	sed -i "s/CONFIG_CTRL_IFACE_DBUS_INTRO=y/# CONFIG_CTRL_IFACE_DBUS_INTRO=y/g" .config && \
 	make -j 16 CC=$(HOST)-gcc && \
 	cd -
 
