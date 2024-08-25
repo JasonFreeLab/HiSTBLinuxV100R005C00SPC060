@@ -693,6 +693,30 @@ static const SSL_METHOD *getSslMethod(Hi_SSL_VERSION_TYPE_E eSSLVersion, HI_BOOL
 {
     const SSL_METHOD *meth;
     
+    // switch (eSSLVersion)
+    // {
+    //     case SSL_VERSION_SSL_V2:
+    //     case SSL_VERSION_SSL_V3:
+    //         sample_printf("%s: Use SSL_VERSION_SSL_V2 or SSL_VERSION_SSL_V3 \n", __FUNCTION__);
+    //         meth = (isServer == HI_TRUE) ? SSLv23_server_method() : SSLv23_client_method();
+    //         break;
+    //     case SSL_VERSION_TLS_V1:
+    //         sample_printf("%s: Use SSL_VERSION_TLS_V1 \n", __FUNCTION__);
+    //         meth = (isServer == HI_TRUE) ? TLSv1_server_method() : TLSv1_client_method();
+    //         break;
+    //     case SSL_VERSION_TLS_V1_1:
+    //         sample_printf("%s: Use SSL_VERSION_TLS_V1_1 \n", __FUNCTION__);
+    //         meth = (isServer == HI_TRUE) ? TLSv1_1_server_method() : TLSv1_1_client_method();
+    //         break;
+    //     case SSL_VERSION_TLS_V1_2:
+    //         sample_printf("%s: Use SSL_VERSION_TLS_V1_2 \n", __FUNCTION__);
+    //         meth = (isServer == HI_TRUE) ? TLSv1_2_server_method() : TLSv1_2_client_method();
+    //         break;    
+    //     default:
+    //         meth = HI_NULL;
+    //         sample_printf("%s: Unknown SSL Version type \n", __FUNCTION__);
+    //        break;
+    // }
     switch (eSSLVersion)
     {
         case SSL_VERSION_SSL_V2:
@@ -701,16 +725,10 @@ static const SSL_METHOD *getSslMethod(Hi_SSL_VERSION_TYPE_E eSSLVersion, HI_BOOL
             meth = (isServer == HI_TRUE) ? SSLv23_server_method() : SSLv23_client_method();
             break;
         case SSL_VERSION_TLS_V1:
-            sample_printf("%s: Use SSL_VERSION_TLS_V1 \n", __FUNCTION__);
-            meth = (isServer == HI_TRUE) ? TLSv1_server_method() : TLSv1_client_method();
-            break;
         case SSL_VERSION_TLS_V1_1:
-            sample_printf("%s: Use SSL_VERSION_TLS_V1_1 \n", __FUNCTION__);
-            meth = (isServer == HI_TRUE) ? TLSv1_1_server_method() : TLSv1_1_client_method();
-            break;
         case SSL_VERSION_TLS_V1_2:
-            sample_printf("%s: Use SSL_VERSION_TLS_V1_2 \n", __FUNCTION__);
-            meth = (isServer == HI_TRUE) ? TLSv1_2_server_method() : TLSv1_2_client_method();
+            sample_printf("%s: Use SSL_VERSION_TLS_V1_X \n", __FUNCTION__);
+            meth = (isServer == HI_TRUE) ? TLS_server_method() : TLS_client_method();
             break;    
         default:
             meth = HI_NULL;
@@ -763,7 +781,8 @@ HI_S32 HI_OpenSSL_Init(Hi_SSL_INIT_PARAMETERS *pInitParamers, HI_OPENSSL_CTX_S *
         }
 
         /*Prefer sever cipher order*/
-        SSL_CTX_ctrl(ctx, SSL_CTRL_OPTIONS,SSL_OP_CIPHER_SERVER_PREFERENCE, NULL);
+        //SSL_CTX_ctrl(ctx, SSL_CTRL_OPTIONS,SSL_OP_CIPHER_SERVER_PREFERENCE, NULL);
+        SSL_CTX_set_options(ctx, SSL_OP_CIPHER_SERVER_PREFERENCE);
 
         /* Load the CAs we trust */
         if(pInitParamers->rootCaCertPath) 

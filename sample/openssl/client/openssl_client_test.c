@@ -84,7 +84,7 @@ HI_S32 main(HI_S32 argc,HI_CHAR *argv[])
     InitParamers.certPath = ClientCert;
     InitParamers.privKeyPath = ClientPrivatekey;  
     InitParamers.cipherList = cipherList;
-    InitParamers.eSSLVersion = SSL_VERSION_TLS_V1_2;
+    InitParamers.eSSLVersion = SSL_VERSION_TLS_V1_1;
     InitParamers.funPasswdCb = client_password_cb;
     InitParamers.bIsServer = HI_FALSE;
 

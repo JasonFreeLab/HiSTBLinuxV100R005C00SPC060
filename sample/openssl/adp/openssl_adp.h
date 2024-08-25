@@ -24,8 +24,8 @@ History       :
 //#define USE_SSL_V2
 //#define USE_SSL_V3
 //#define USE_TLS_V1
-//#define USE_TLS_V1_1
-#define USE_TLS_V1_2
+#define USE_TLS_V1_1
+// #define USE_TLS_V1_2
 
 typedef enum hiSSL_VERSION_TYPE_E
 {
