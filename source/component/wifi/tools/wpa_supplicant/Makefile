@@ -59,7 +59,9 @@ all: $(BUILD_MODULES)
 	@test -d $(INSTALL_DIR) || mkdir -p $(INSTALL_DIR)
 	@cp -v $(MODULE_PATH) $(INSTALL_DIR)/
 	@test -d $(WPACONF_INSTALL_DIR) || mkdir -p $(WPACONF_INSTALL_DIR)
-	@cp -v $(WPACONF_PATH) $(WPACONF_INSTALL_DIR)/
+	@touch $(WPACONF_INSTALL_DIR)/$(WPACONF)
+	@echo "ctrl_interface=/var/run/wpa_supplicant" >> $(WPACONF_INSTALL_DIR)/$(WPACONF)
+#	@cp -v $(WPACONF_PATH) $(WPACONF_INSTALL_DIR)/
 ifeq ($(CFG_HI_WIFI_DEVICE_HI1131C),y)
 	@chmod 777 $(INSTALL_DIR)/hisi_supplicant
 endif
