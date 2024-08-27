@@ -218,6 +218,18 @@ ifeq ($(CFG_HI_DIRECTFB_MULTI_SUPPORT),y)
 	$(AT)echo "insmod fusion.ko" >> $(HI_MODULE_DIR)/load
 endif
 
+ifeq ($(CFG_HI_WIFI_SUPPORT),y)
+	$(AT)echo "insmod cfg80211.ko" >> $(HI_MODULE_DIR)/load
+endif
+
+ifeq ($(CFG_HI_WIFI_DEVICE_RTL8812AU),y)
+	$(AT)echo "insmod rtl8812au.ko" >> $(HI_MODULE_DIR)/load
+endif
+
+ifeq ($(CFG_HI_WIFI_DEVICE_RTL8822BS),y)
+	$(AT)echo "insmod rtl8822bs.ko" >> $(HI_MODULE_DIR)/load
+endif
+
 	$(AT)echo "echo 2097152 > /proc/sys/net/core/rmem_max" >> $(HI_MODULE_DIR)/load
 
 ifndef CFG_HI_ADVCA_FUNCTION
@@ -468,6 +480,19 @@ endif
     endif
 
 endif   # End of ifneq ($(CFG_HI_MSP_BUILDIN),y)
+
+ifeq ($(CFG_HI_WIFI_SUPPORT),y)
+	$(AT)echo "rmmod cfg80211.ko" >> $(HI_MODULE_DIR)/unload
+endif
+
+ifeq ($(CFG_HI_WIFI_DEVICE_RTL8812AU),y)
+	$(AT)echo "rmmod rtl8812au.ko" >> $(HI_MODULE_DIR)/unload
+endif
+
+ifeq ($(CFG_HI_WIFI_DEVICE_RTL8822BS),y)
+	$(AT)echo "rmmod rtl8822bs.ko" >> $(HI_MODULE_DIR)/unload
+endif
+
 	$(AT)chmod +x $(HI_MODULE_DIR)/unload
 
 clean:
