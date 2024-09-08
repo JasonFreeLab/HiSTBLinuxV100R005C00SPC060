@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # SDK version: KERNELVERSION
-# Sun Aug 25 15:18:08 2024
+# Sun Sep  8 15:37:49 2024
 #
 
 #
@@ -1477,6 +1477,8 @@ CFG_HI_WIFI_MODE_AP=y
 #
 CFG_HI_WIFI_TOOL_WIRELESS_TOOLS=y
 CFG_HI_WIFI_TOOL_IW=y
+CFG_HI_WIFI_TOOL_AIRCRACK_NG=y
+CFG_HI_WIFI_TOOL_TCPDUMP=y
 # CFG_HI_BLUETOOTH_SUPPORT is not set
 # CFG_HI_DRM_SUPPORT is not set
 CFG_HI_VP_SUPPORT=y

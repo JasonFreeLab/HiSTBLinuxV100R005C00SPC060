@@ -11,8 +11,10 @@ endif
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ifeq ($(CFG_HI_64BIT_SYSTEM),y)
 OBJ_NAME := obj64
+LIB_NAME := lib64
 else
 OBJ_NAME := obj
+LIB_NAME := lib
 endif
 
 ifneq ($(HI_OUT_DIR),)
@@ -20,17 +22,13 @@ BUILD_DIR := $(HI_OUT_DIR)/$(OBJ_NAME)/source/component/wifi/tools/libnl
 LOCAL_PREFIX :=  $(HI_OUT_DIR)/$(OBJ_NAME)/source/component/wifi/tools/libnl/_install
 else
 BUILD_DIR := $(CURDIR)/tmp
-LOCAL_PREFIX := $(CURDIR)/_install
+LOCAL_PREFIX := $(COMPONENT_DIR)/wifi/tools/libnl/_install
 endif
+
+INSTALL_DIR := $(HI_ROOTFS_DIR)/$(LIB_NAME)
 
 HOST := $(HI_KERNEL_TOOLCHAINS_NAME)
 CROSS_COMPILE := $(HOST)-
-
-ifeq ($(CFG_HI_64BIT_SYSTEM),y)
-INSTALL_DIR := $(HI_ROOTFS_DIR)/lib64
-else
-INSTALL_DIR := $(HI_ROOTFS_DIR)/lib
-endif
 
 MODULE_SRC := libnl-3.5.0
 MODULE := libnl-3.so.200.26.0 \
@@ -77,7 +75,8 @@ uninstall: $(UNINSTALL_MODULES)
 	@test -d $(BUILD_DIR)/$(patsubst %_build,%,$@) \
 		|| tar -zxf $(patsubst %_build,%,$@).tar.gz -C $(BUILD_DIR)
 	cd $(BUILD_DIR)/$(patsubst %_build,%,$@) && \
-	./configure --host=$(HOST) CC=$(HOST)-gcc AR=$(HOST)-ar --prefix=$(LOCAL_PREFIX) && \
+	./configure --host=$(HOST) --prefix=$(LOCAL_PREFIX) && \
+	make -j16 && \
 	make install && \
 	cd -
 

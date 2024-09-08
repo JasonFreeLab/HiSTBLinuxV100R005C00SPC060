@@ -26,6 +26,7 @@ OPENSSL_DIR := $(COMPONENT_DIR)/openssl/release
 endif
 
 INSTALL_DIR := $(HI_ROOTFS_DIR)/sbin
+
 HOST := $(HI_KERNEL_TOOLCHAINS_NAME)
 CROSS_COMPILE := $(HOST)-
 
@@ -84,7 +85,7 @@ uninstall: $(UNINSTALL_MODULES)
 		echo "LIBS += -L$(OPENSSL_DIR)/lib"; \
 		echo "LIBS_p += -L$(OPENSSL_DIR)/lib"; \
 		) >> .config && \
-	make -j 16 CC=$(HOST)-gcc && \
+	make -j16 CC=$(CROSS_COMPILE)gcc && \
 	cd -
 
 $(BUILD_DIR):

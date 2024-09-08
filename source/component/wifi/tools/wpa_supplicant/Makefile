@@ -27,6 +27,7 @@ endif
 
 HOST := $(HI_KERNEL_TOOLCHAINS_NAME)
 CROSS_COMPILE := $(HOST)-
+
 INSTALL_DIR := $(HI_ROOTFS_DIR)/sbin
 
 WPACONF_INSTALL_DIR := $(HI_ROOTFS_DIR)/etc/Wireless
@@ -99,7 +100,7 @@ uninstall: $(UNINSTALL_MODULES)
 		) >> .config && \
 	sed -i "s/CONFIG_CTRL_IFACE_DBUS_NEW=y/# CONFIG_CTRL_IFACE_DBUS_NEW=y/g" .config && \
 	sed -i "s/CONFIG_CTRL_IFACE_DBUS_INTRO=y/# CONFIG_CTRL_IFACE_DBUS_INTRO=y/g" .config && \
-	make -j 16 CC=$(HOST)-gcc && \
+	make -j16 CC=$(CROSS_COMPILE)gcc && \
 	cd -
 
 $(BUILD_DIR):

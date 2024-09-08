@@ -92,4 +92,14 @@ config  HI_WIFI_TOOL_IW
     help
         iw
 
+config  HI_WIFI_TOOL_AIRCRACK_NG
+    bool "aircrack-ng"
+    help
+        aircrack-ng
+
+config  HI_WIFI_TOOL_TCPDUMP
+    bool "tcpdump"
+    help
+        tcpdump
+
 endmenu

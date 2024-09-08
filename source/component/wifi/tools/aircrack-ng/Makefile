@@ -11,24 +11,26 @@ endif
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ifeq ($(CFG_HI_64BIT_SYSTEM),y)
 OBJ_NAME := obj64
+LIB_NAME := lib64
 else
 OBJ_NAME := obj
+LIB_NAME := lib
 endif
 
 ifneq ($(HI_OUT_DIR),)
 BUILD_DIR := $(HI_OUT_DIR)/$(OBJ_NAME)/source/component/wifi/tools/aircrack-ng
-LOCAL_PREFIX :=  $(HI_OUT_DIR)/$(OBJ_NAME)/source/component/wifi/tools/aircrack-ng/_install
+LOCAL_PREFIX :=  $(BUILD_DIR)/_install
 LIBNL_DIR := $(HI_OUT_DIR)/$(OBJ_NAME)/source/component/wifi/tools/libnl/_install
 OPENSSL_DIR := $(HI_OUT_DIR)/$(OBJ_NAME)/source/component/openssl/release
 ZLIB_DIR := $(HI_OUT_DIR)/$(OBJ_NAME)/source/component/zlib/release
-HWLOC_DIR := $(HI_OUT_DIR)/$(OBJ_NAME)/source/component/hwloc/release
+HWLOC_DIR := $(HI_OUT_DIR)/$(OBJ_NAME)/source/component/wifi/tools/hwloc/_install
 else
 BUILD_DIR := $(CURDIR)/tmp
-LOCAL_PREFIX := $(CURDIR)/_install
+LOCAL_PREFIX := $(COMPONENT_DIR)/wifi/tools/aircrack-ng/_install
 LIBNL_DIR := $(COMPONENT_DIR)/wifi/tools/libnl/_install
 OPENSSL_DIR := $(COMPONENT_DIR)/openssl/release
 ZLIB_DIR := $(COMPONENT_DIR)/zlib/release
-HWLOC_DIR := $(COMPONENT_DIR)/hwloc/release
+HWLOC_DIR := $(COMPONENT_DIR)/wifi/tools/hwloc/_install
 endif
 
 HOST := $(HI_KERNEL_TOOLCHAINS_NAME)
@@ -37,11 +39,7 @@ CROSS_COMPILE := $(HOST)-
 INSTALL_DIR_BIN := $(HI_ROOTFS_DIR)/bin
 INSTALL_DIR_SBIN := $(HI_ROOTFS_DIR)/sbin
 
-ifeq ($(CFG_HI_64BIT_SYSTEM),y)
-INSTALL_DIR_LIB := $(HI_ROOTFS_DIR)/lib64
-else
-INSTALL_DIR_LIB := $(HI_ROOTFS_DIR)/lib
-endif
+INSTALL_DIR_LIB := $(HI_ROOTFS_DIR)/$(LIB_NAME)
 
 MODULE_SRC := aircrack-ng-1.7
 MODULE_BIN := aircrack-ng airdecap-ng airdecloak-ng buddy-ng ivstools kstats makeivs-ng packetforge-ng wpaclean

@@ -27,6 +27,18 @@ ifeq ($(CFG_HI_WIFI_TOOL_IW),y)
 objects += iw
 endif
 
+ifeq ($(CFG_HI_WIFI_TOOL_AIRCRACK_NG),y)
+objects += hwloc
+objects += aircrack-ng
+objects += libmnl
+objects += ethtool
+endif
+
+ifeq ($(CFG_HI_WIFI_TOOL_TCPDUMP),y)
+objects += libpcap
+objects += tcpdump
+endif
+
 objects_clean:=$(addsuffix _clean,$(objects))
 objects_install:=$(addsuffix _install,$(objects))
 objects_uninstall:=$(addsuffix _uninstall,$(objects))
@@ -49,6 +61,14 @@ endif
 ifeq ($(CFG_HI_WIFI_TOOL_IW),y)
 iw: libnl
 endif
+ifeq ($(CFG_HI_WIFI_TOOL_AIRCRACK_NG),y)
+aircrack-ng: libnl hwloc
+ethtool: libmnl
+endif
+ifeq ($(CFG_HI_WIFI_TOOL_TCPDUMP),y)
+libpcap: libnl
+tcpdump: libnl libpcap
+endif
 
 clean: $(objects_clean)
 
@@ -61,6 +81,14 @@ hostapd_install: libnl_install
 endif
 ifeq ($(CFG_HI_WIFI_TOOL_IW),y)
 iw_install: libnl_install
+endif
+ifeq ($(CFG_HI_WIFI_TOOL_AIRCRACK_NG),y)
+aircrack-ng_install: libnl_install hwloc_install
+ethtool_install: libmnl_install
+endif
+ifeq ($(CFG_HI_WIFI_TOOL_TCPDUMP),y)
+libpcap_install: libnl_install
+tcpdump_install: libnl_install libpcap_install
 endif
 
 uninstall: $(objects_uninstall)

@@ -11,16 +11,18 @@ endif
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ifeq ($(CFG_HI_64BIT_SYSTEM),y)
 OBJ_NAME := obj64
+LIB_NAME := lib64
 else
 OBJ_NAME := obj
+LIB_NAME := lib
 endif
 
 ifneq ($(HI_OUT_DIR),)
 BUILD_DIR := $(HI_OUT_DIR)/$(OBJ_NAME)/source/component/wifi/tools/wireless-tools
-LOCAL_PREFIX :=  $(HI_OUT_DIR)/$(OBJ_NAME)/source/component/wifi/tools/wireless-tools/_install
+LOCAL_PREFIX :=  $(BUILD_DIR)/_install
 else
 BUILD_DIR := $(CURDIR)/tmp
-LOCAL_PREFIX := $(CURDIR)/_install
+LOCAL_PREFIX := $(COMPONENT_DIR)/wifi/tools/wireless-tools/_install
 endif
 
 HOST := $(HI_KERNEL_TOOLCHAINS_NAME)
@@ -28,11 +30,7 @@ CROSS_COMPILE := $(HOST)-
 
 INSTALL_DIR := $(HI_ROOTFS_DIR)/sbin
 
-ifeq ($(CFG_HI_64BIT_SYSTEM),y)
-INSTALL_LIB_DIR := $(HI_ROOTFS_DIR)/lib64
-else
-INSTALL_LIB_DIR := $(HI_ROOTFS_DIR)/lib
-endif
+INSTALL_LIB_DIR := $(HI_ROOTFS_DIR)/$(LIB_NAME)
 
 MODULE_SRC := wireless_tools.29
 MODULE := ifrename iwconfig iwevent iwgetid iwlist iwpriv iwspy
@@ -84,13 +82,10 @@ uninstall: $(UNINSTALL_MODULES) \
 		|| tar -zxf $(patsubst %_build,%,$@).tar.gz -C $(BUILD_DIR) \
 		&& cp wireless_tools-29-fix_iwlist_scanning-1.patch $(BUILD_DIR)
 	cd $(BUILD_DIR)/$(patsubst %_build,%,$@) && \
-		patch -Np1 -i ../wireless_tools-29-fix_iwlist_scanning-1.patch && \
-		sed -i "s/CC = gcc/CC = $(CROSS_COMPILE)gcc/g" Makefile && \
-		sed -i "s/AR = ar/AR = $(CROSS_COMPILE)ar/g" Makefile && \
-		sed -i "s/RANLIB = ranlib/RANLIB = $(CROSS_COMPILE)ranlib/g" Makefile && \
-		make -j 16 && \
-		make PREFIX=$(LOCAL_PREFIX) install && \
-		cd -
+	patch -Np1 -i ../wireless_tools-29-fix_iwlist_scanning-1.patch && \
+	make -j16 CC=$(CROSS_COMPILE)gcc && \
+	make PREFIX=$(LOCAL_PREFIX) install && \
+	cd -
 
 $(BUILD_DIR):
 	@test -d $(BUILD_DIR) || mkdir -p $(BUILD_DIR)

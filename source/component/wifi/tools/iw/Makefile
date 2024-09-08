@@ -18,12 +18,12 @@ endif
 ifneq ($(HI_OUT_DIR),)
 BUILD_DIR := $(HI_OUT_DIR)/$(OBJ_NAME)/source/component/wifi/tools/iw
 LIBNL_DIR := $(HI_OUT_DIR)/$(OBJ_NAME)/source/component/wifi/tools/libnl/_install
-PKG_CONFIG_PATH := $(LIBNL_DIR)/lib/pkgconfig
 else
-BUILD_DIR := $(shell pwd)/tmp
+BUILD_DIR := $(CURDIR)/tmp
 LIBNL_DIR := $(COMPONENT_DIR)/wifi/tools/libnl/_install
-PKG_CONFIG_PATH := $(LIBNL_DIR)/lib/pkgconfig
 endif
+
+PKG_CONFIG_PATH := $(LIBNL_DIR)/lib/pkgconfig
 
 INSTALL_DIR := $(HI_ROOTFS_DIR)/sbin
 HOST := $(HI_KERNEL_TOOLCHAINS_NAME)
@@ -63,7 +63,7 @@ uninstall: $(UNINSTALL_MODULES)
 	@test -d $(BUILD_DIR)/$(patsubst %_build,%,$@) \
 		|| tar -zxf $(patsubst %_build,%,$@).tar.gz -C $(BUILD_DIR)
 	cd $(BUILD_DIR)/$(patsubst %_build,%,$@) && \
-	export PKG_CONFIG_PATH=$(PKG_CONFIG_PATH):$PKG_CONFIG_PATH && \
+	export PKG_CONFIG_PATH="$(PKG_CONFIG_PATH):$$PKG_CONFIG_PATH" && \
 	make CC=$(CROSS_COMPILE)gcc PREFIX=$(LOCAL_PREFIX) -j16 && \
 	cd -
 
