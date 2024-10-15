@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # SDK version: KERNELVERSION
-# Sun Sep  8 15:37:49 2024
+# Tue Oct 15 17:56:47 2024
 #
 
 #
@@ -1483,6 +1483,17 @@ CFG_HI_WIFI_TOOL_TCPDUMP=y
 # CFG_HI_DRM_SUPPORT is not set
 CFG_HI_VP_SUPPORT=y
 # CFG_HI_KEYPROVISION_SUPPORT is not set
+
+#
+# FFmpeg Config
+#
+CFG_HI_FFMPEF_SUPPORT=y
+
+#
+# PCRE Config
+#
+CFG_HI_PCRE_SUPPORT=y
+# CFG_HI_PCRE2_SUPPORT is not set
 # CFG_HI_TEE_SUPPORT is not set
 
 #

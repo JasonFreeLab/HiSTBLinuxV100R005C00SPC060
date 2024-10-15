@@ -11,8 +11,10 @@ endif
 #===============================================================================
 ifeq ($(CFG_HI_64BIT_SYSTEM),y)
 OBJ_NAME := obj64
+LIB_NAME := lib64
 else
 OBJ_NAME := obj
+LIB_NAME := lib
 endif
 
 ifneq ($(HI_OUT_DIR),)
@@ -23,12 +25,13 @@ BUILD_DIR  := $(CURDIR)/tmp
 LOCAL_PREFIX := $(COMPONENT_DIR)/wifi/tools/hwloc/_install
 endif
 
+INSTALL_DIR := $(HI_ROOTFS_DIR)/$(LIB_NAME)
 HOST := $(HI_KERNEL_TOOLCHAINS_NAME)
 CROSS_COMPILE := $(HOST)-
 
 MODULE_SRC := hwloc-2.11.1
-MODULE := hwloc-info
-MODULE_PATH := $(LOCAL_PREFIX)/bin/hwloc-info
+MODULE := libhwloc.so.15.8.0
+MODULE_PATH := $(LOCAL_PREFIX)/lib/libhwloc.so.15.8.0
 
 BUILD_MODULES = $(patsubst %,%_build,${MODULE_SRC})
 UNINSTALL_MODULES = $(patsubst %,%_uninstall,${MODULE})
@@ -43,7 +46,7 @@ UNINSTALL_MODULES = $(patsubst %,%_uninstall,${MODULE})
 .PHONY: all clean install uninstall
 all: $(BUILD_MODULES)
 	@test -d $(INSTALL_DIR) || mkdir -p $(INSTALL_DIR)
-#	@cp -v $(MODULE_PATH) $(INSTALL_DIR)/
+	@cp -v $(MODULE_PATH) $(INSTALL_DIR)/
 
 clean:
 	@rm -rf $(BUILD_DIR)

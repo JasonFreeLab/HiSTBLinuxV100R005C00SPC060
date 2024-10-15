@@ -35,4 +35,6 @@ source "scripts/kconfig/Kconfig.bluetooth"
 source "scripts/kconfig/Kconfig.drm"
 source "scripts/kconfig/Kconfig.vp"
 source "scripts/kconfig/Kconfig.keyprovision"
+source "scripts/kconfig/Kconfig.ffmpeg"
+source "scripts/kconfig/Kconfig.pcre"
 endmenu

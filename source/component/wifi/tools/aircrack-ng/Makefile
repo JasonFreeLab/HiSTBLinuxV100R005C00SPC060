@@ -24,6 +24,7 @@ LIBNL_DIR := $(HI_OUT_DIR)/$(OBJ_NAME)/source/component/wifi/tools/libnl/_instal
 OPENSSL_DIR := $(HI_OUT_DIR)/$(OBJ_NAME)/source/component/openssl/release
 ZLIB_DIR := $(HI_OUT_DIR)/$(OBJ_NAME)/source/component/zlib/release
 HWLOC_DIR := $(HI_OUT_DIR)/$(OBJ_NAME)/source/component/wifi/tools/hwloc/_install
+PCRE_DIR := $(HI_OUT_DIR)/$(OBJ_NAME)/source/component/pcre/_install
 else
 BUILD_DIR := $(CURDIR)/tmp
 LOCAL_PREFIX := $(COMPONENT_DIR)/wifi/tools/aircrack-ng/_install
@@ -31,6 +32,7 @@ LIBNL_DIR := $(COMPONENT_DIR)/wifi/tools/libnl/_install
 OPENSSL_DIR := $(COMPONENT_DIR)/openssl/release
 ZLIB_DIR := $(COMPONENT_DIR)/zlib/release
 HWLOC_DIR := $(COMPONENT_DIR)/wifi/tools/hwloc/_install
+PCRE_DIR := $(COMPONENT_DIR)/pcre/_install
 endif
 
 HOST := $(HI_KERNEL_TOOLCHAINS_NAME)
@@ -110,14 +112,17 @@ uninstall: $(UNINSTALL_MODULES_BIN) $(UNINSTALL_MODULES_SBIN) $(UNINSTALL_MODULE
 	--host=$(HOST) \
 	--prefix=$(LOCAL_PREFIX) \
 	--with-openssl=$(OPENSSL_DIR) \
-	CFLAGS="-L$(OPENSSL_DIR)/lib \
-	-I$(OPENSSL_DIR)/include \
-	-L$(LIBNL_DIR)/lib \
+	CFLAGS="-I$(OPENSSL_DIR)/include \
 	-I$(LIBNL_DIR)/include/libnl3 \
-	-L$(ZLIB_DIR)/lib \
 	-I$(ZLIB_DIR)/include \
+	-I$(HWLOC_DIR)/include \
+	-I$(PCRE_DIR)/include" \
+	LDFLAGS="-L$(OPENSSL_DIR)/lib \
+	-L$(LIBNL_DIR)/lib \
+	-L$(ZLIB_DIR)/lib \
 	-L$(HWLOC_DIR)/lib \
-	-I$(HWLOC_DIR)/include" && \
+	-L$(PCRE_DIR)/lib" \
+	&& \
 	make -j16 && \
 	make install
 

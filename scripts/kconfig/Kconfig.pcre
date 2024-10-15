@@ -1,0 +1,17 @@
+menu "PCRE Config"
+
+config HI_PCRE_SUPPORT
+    bool "PCRE Support"
+    help
+        when enabled, support pcre
+
+    default y
+
+config HI_PCRE2_SUPPORT
+    bool "PCRE2 Support"
+    help
+        when enabled, support pcre2
+
+    default n
+
+endmenu

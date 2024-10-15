@@ -1,0 +1,10 @@
+menu "FFmpeg Config"
+
+config HI_FFMPEF_SUPPORT
+    bool "FFmpeg Support"
+    help
+        when enabled, support FFmpeg
+
+    default y
+
+endmenu

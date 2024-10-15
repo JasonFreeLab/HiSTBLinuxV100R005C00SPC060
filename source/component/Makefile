@@ -106,6 +106,19 @@ else ifeq ($(CFG_HI_PLAYER_SUPPORT),y)
     objects += drm
 endif
 
+ifeq ($(CFG_HI_FFMPEF_SUPPORT),y)
+objects += x264
+objects += ffmpeg
+endif
+
+ifeq ($(CFG_HI_PCRE_SUPPORT),y)
+objects += pcre
+endif
+
+ifeq ($(CFG_HI_PCRE2_SUPPORT),y)
+objects += pcre2
+endif
+
 objects_clean := $(addsuffix _clean,$(objects))
 
 depends += $(objects)
@@ -143,7 +156,10 @@ depends_clean := $(addsuffix _clean,$(depends))
 
 all: $(depends)
 ifeq ($(CFG_HI_WIFI_SUPPORT),y)
-wifi: openssl
+wifi: openssl pcre
+endif
+ifeq ($(CFG_HI_FFMPEF_SUPPORT),y)
+ffmpeg: x264
 endif
 
 clean: $(depends_clean)
