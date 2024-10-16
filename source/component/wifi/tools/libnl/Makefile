@@ -41,7 +41,7 @@ MODULE_PATH := $(BUILD_DIR)/$(MODULE_SRC)/lib/.libs/libnl-3.so.200.26.0 \
 	$(BUILD_DIR)/$(MODULE_SRC)/lib/.libs/libnl-3.so.200 \
 	$(BUILD_DIR)/$(MODULE_SRC)/lib/.libs/libnl-genl-3.so.200.26.0 \
 	$(BUILD_DIR)/$(MODULE_SRC)/lib/.libs/libnl-genl-3.so.200 \
-		$(BUILD_DIR)/$(MODULE_SRC)/lib/.libs/libnl-route-3.so.200.26.0 \
+	$(BUILD_DIR)/$(MODULE_SRC)/lib/.libs/libnl-route-3.so.200.26.0 \
 	$(BUILD_DIR)/$(MODULE_SRC)/lib/.libs/libnl-route-3.so.200
 
 BUILD_MODULES = $(patsubst %,%_build,${MODULE_SRC})
@@ -75,7 +75,9 @@ uninstall: $(UNINSTALL_MODULES)
 	@test -d $(BUILD_DIR)/$(patsubst %_build,%,$@) \
 		|| tar -zxf $(patsubst %_build,%,$@).tar.gz -C $(BUILD_DIR)
 	cd $(BUILD_DIR)/$(patsubst %_build,%,$@) && \
-	./configure --host=$(HOST) --prefix=$(LOCAL_PREFIX) && \
+	./configure \
+		--host=$(HOST) \
+		--prefix=$(LOCAL_PREFIX) && \
 	make -j16 && \
 	make install && \
 	cd -

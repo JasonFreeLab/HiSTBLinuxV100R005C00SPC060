@@ -67,8 +67,9 @@ uninstall: $(UNINSTALL_MODULES)
 		|| tar -zxf $(patsubst %_build,%,$@).tar.gz -C $(BUILD_DIR)
 	cd $(BUILD_DIR)/$(patsubst %_build,%,$@) && \
 	export PKG_CONFIG_PATH="$(PKG_CONFIG_PATH):$$PKG_CONFIG_PATH" && \
-	./configure --host=$(HOST) \
-	--prefix=$(LOCAL_PREFIX) && \
+	./configure \
+		--host=$(HOST) \
+		--prefix=$(LOCAL_PREFIX) && \
 	make -j16 && \
 	make install && \
 	cd -

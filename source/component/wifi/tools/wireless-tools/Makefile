@@ -25,30 +25,27 @@ BUILD_DIR := $(CURDIR)/tmp
 LOCAL_PREFIX := $(COMPONENT_DIR)/wifi/tools/wireless-tools/_install
 endif
 
+INSTALL_SBIN_DIR := $(HI_ROOTFS_DIR)/sbin
+INSTALL_LIB_DIR := $(HI_ROOTFS_DIR)/$(LIB_NAME)
 HOST := $(HI_KERNEL_TOOLCHAINS_NAME)
 CROSS_COMPILE := $(HOST)-
-
-INSTALL_DIR := $(HI_ROOTFS_DIR)/sbin
-
-INSTALL_LIB_DIR := $(HI_ROOTFS_DIR)/$(LIB_NAME)
 
 MODULE_SRC := wireless_tools.29
 MODULE := ifrename iwconfig iwevent iwgetid iwlist iwpriv iwspy
 MODULE_LIB := libiw.so.29
 
-MODULE_PATH := $(LOCAL_PREFIX)/sbin/ifrename \
+MODULE_SBIN_PATH := $(LOCAL_PREFIX)/sbin/ifrename \
 	$(LOCAL_PREFIX)/sbin/iwconfig \
 	$(LOCAL_PREFIX)/sbin/iwevent \
 	$(LOCAL_PREFIX)/sbin/iwgetid \
 	$(LOCAL_PREFIX)/sbin/iwlist \
 	$(LOCAL_PREFIX)/sbin/iwpriv \
-	$(LOCAL_PREFIX)/sbin/iwspy \
-
+	$(LOCAL_PREFIX)/sbin/iwspy
 MODULE_LIB_PATH := $(LOCAL_PREFIX)/lib/libiw.so.29
 
 BUILD_MODULES = $(patsubst %,%_build,${MODULE_SRC})
 UNINSTALL_MODULES = $(patsubst %,%_uninstall,${MODULE})
-UNINSTALL_MODULES_LIB = $(patsubst %,%_uninstall_lib,${MODULE_LIB})
+UNINSTALL_LIB_MODULES = $(patsubst %,%_uninstall_lib,${MODULE_LIB})
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #   rules
@@ -59,8 +56,8 @@ UNINSTALL_MODULES_LIB = $(patsubst %,%_uninstall_lib,${MODULE_LIB})
 #==================================================================
 .PHONY: all clean install uninstall
 all: $(BUILD_MODULES)
-	@test -d $(INSTALL_DIR) || mkdir -p $(INSTALL_DIR)
-	@cp -v $(MODULE_PATH) $(INSTALL_DIR)/
+	@test -d $(INSTALL_SBIN_DIR) || mkdir -p $(INSTALL_SBIN_DIR)
+	@cp -v $(MODULE_SBIN_PATH) $(INSTALL_SBIN_DIR)/
 	@test -d $(INSTALL_LIB_DIR) || mkdir -p $(INSTALL_LIB_DIR)
 	@cp -v $(MODULE_LIB_PATH) $(INSTALL_LIB_DIR)/
 
@@ -70,8 +67,7 @@ clean:
 
 install: all
 
-uninstall: $(UNINSTALL_MODULES) \
-	$(UNINSTALL_MODULES_LIB)
+uninstall: $(UNINSTALL_MODULES) $(UNINSTALL_LIB_MODULES)
 
 #==================================================================
 #                          modules
@@ -91,7 +87,7 @@ $(BUILD_DIR):
 	@test -d $(BUILD_DIR) || mkdir -p $(BUILD_DIR)
 
 %_uninstall:
-	@rm -f $(INSTALL_DIR)/$(patsubst %_uninstall,%,$@)
+	@rm -f $(INSTALL_SBIN_DIR)/$(patsubst %_uninstall,%,$@)
 
 %_uninstall_lib:
 	@rm -f $(INSTALL_LIB_DIR)/$(patsubst %_uninstall_lib,%,$@)

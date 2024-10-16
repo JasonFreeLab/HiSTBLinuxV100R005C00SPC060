@@ -64,8 +64,9 @@ uninstall: $(UNINSTALL_MODULES)
 	@test -d $(BUILD_DIR)/$(patsubst %_build,%,$@) \
 		|| tar -zxf $(patsubst %_build,%,$@).tar.gz -C $(BUILD_DIR)
 	cd $(BUILD_DIR)/$(patsubst %_build,%,$@) && \
-	./configure --host=$(HOST) \
-	--prefix=$(LOCAL_PREFIX) && \
+	./configure \
+		--host=$(HOST) \
+		--prefix=$(LOCAL_PREFIX) && \
 	make -j16 && \
 	make install && \
 	cd -

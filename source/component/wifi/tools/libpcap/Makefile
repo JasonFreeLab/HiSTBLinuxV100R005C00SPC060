@@ -71,15 +71,16 @@ uninstall: $(UNINSTALL_MODULES)
 		|| tar Jxvf $(patsubst %_build,%,$@).tar.xz -C $(BUILD_DIR)
 	cd $(BUILD_DIR)/$(patsubst %_build,%,$@) && \
 	export PKG_CONFIG_PATH="$(PKG_CONFIG_PATH):$$PKG_CONFIG_PATH" && \
-	./configure --host=$(HOST) \
-	--prefix=$(LOCAL_PREFIX) \
-	--with-pcap=linux && \
+	./configure \
+		--host=$(HOST) \
+		--prefix=$(LOCAL_PREFIX) \
+		--with-pcap=linux && \
 	make -j16 && \
-	make install
+	make install && \
+	cd -
 	@test -d $(BUILD_DIR)/../tcpdump || mkdir $(BUILD_DIR)/../tcpdump
 	@test -d $(BUILD_DIR)/../tcpdump/$(patsubst %_build,%,$@) \
 		|| ln -s $(BUILD_DIR)/$(patsubst %_build,%,$@) $(BUILD_DIR)/../tcpdump/$(patsubst %_build,%,$@)
-	cd -
 
 $(BUILD_DIR):
 	@test -d $(BUILD_DIR) || mkdir -p $(BUILD_DIR)
