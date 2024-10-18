@@ -37,4 +37,5 @@ source "scripts/kconfig/Kconfig.vp"
 source "scripts/kconfig/Kconfig.keyprovision"
 source "scripts/kconfig/Kconfig.ffmpeg"
 source "scripts/kconfig/Kconfig.pcre"
+source "scripts/kconfig/Kconfig.wfb_ng"
 endmenu

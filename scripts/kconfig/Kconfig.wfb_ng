@@ -1,0 +1,10 @@
+menu "WFB-NG Config"
+
+config HI_WFB_NG_SUPPORT
+    bool "WFB-NG Support"
+    help
+        when enabled, support WFB-NG
+
+    default y
+
+endmenu

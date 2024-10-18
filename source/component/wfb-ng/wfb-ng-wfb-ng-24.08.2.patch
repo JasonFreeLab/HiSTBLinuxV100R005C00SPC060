@@ -1,0 +1,49 @@
+Submitted By: jason
+Date: 2024-10-14
+Initial Package Version: 24.08.2
+Upstream Status: From Upstream
+Origin: Arch Linux https://bugs.archlinux.org/task/15363
+Description: debug.
+
+diff -Naur wfb-ng-wfb-ng-re/src/rx.cpp wfb-ng-wfb-ng-24.08.2/src/rx.cpp
+--- wfb-ng-wfb-ng-re/src/rx.cpp	2024-10-01 21:49:27.000000000 +0800
++++ wfb-ng-wfb-ng-24.08.2/src/rx.cpp	2024-10-16 22:46:21.505593931 +0800
+@@ -356,10 +356,11 @@
+                                const int8_t *rssi, const int8_t *noise, uint16_t freq, uint8_t mcs_index,
+                                uint8_t bandwidth, sockaddr_in *sockaddr)
+ {
+-    wrxfwd_t fwd_hdr = { .wlan_idx = wlan_idx,
+-                         .freq = htons(freq),
+-                         .mcs_index = mcs_index,
+-                         .bandwidth = bandwidth };
++    wrxfwd_t fwd_hdr;
++    fwd_hdr.wlan_idx = wlan_idx;
++    fwd_hdr.freq = htons(freq);
++    fwd_hdr.mcs_index = mcs_index;
++    fwd_hdr.bandwidth = bandwidth;
+ 
+     memcpy(fwd_hdr.antenna, antenna, RX_ANT_MAX * sizeof(uint8_t));
+     memcpy(fwd_hdr.rssi, rssi, RX_ANT_MAX * sizeof(int8_t));
+diff -Naur wfb-ng-wfb-ng-re/src/rx.hpp wfb-ng-wfb-ng-24.08.2/src/rx.hpp
+--- wfb-ng-wfb-ng-re/src/rx.hpp	2024-10-01 21:49:27.000000000 +0800
++++ wfb-ng-wfb-ng-24.08.2/src/rx.hpp	2024-10-16 22:46:18.631766666 +0800
+@@ -155,9 +155,9 @@
+     seed ^= std::hash<T>{}(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+ }
+ 
+-
++namespace std{
+ template<>
+-struct std::hash<rxAntennaKey>
++struct hash<rxAntennaKey>
+ {
+     std::size_t operator()(const rxAntennaKey& k) const noexcept
+     {
+@@ -169,6 +169,7 @@
+         return h;
+     }
+ };
++}
+ 
+ typedef std::unordered_map<rxAntennaKey, rxAntennaItem> rx_antenna_stat_t;
+ 
