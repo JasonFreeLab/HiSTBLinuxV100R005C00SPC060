@@ -54,7 +54,7 @@ ifeq ($(HI_USER_SPACE_LIB64),y)
 endif
 
 clean:
-	$(AT)rm -rf $(INSTALL_DIR) $(INSTALL_DIR64) $(ZLIB_DIR)/$(ZLIB) $(ZLIB_DIR64)/$(ZLIB)
+	$(AT)rm -rf $(INSTALL_DIR) $(INSTALL_DIR64) $(ZLIB_DIR) $(ZLIB_DIR64)
 	$(AT)rm -rf $(HI_STATIC_LIB_DIR)/libz.a $(HI_SHARED_LIB_DIR)/libz.so*
 	$(AT)rm -rf $(HI_STATIC_LIB64_DIR)/libz.a $(HI_SHARED_LIB64_DIR)/libz.so*
 

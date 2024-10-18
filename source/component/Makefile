@@ -12,6 +12,7 @@ endif
 objects := freetype
 objects += harfbuzz
 objects += zlib
+objects += libsodium
 
 ifneq ($(CFG_HI_LOADER_APPLOADER),y)
 objects += jpeg
@@ -65,6 +66,10 @@ endif
 
 ifeq ($(CFG_HI_CAPTION_CC_SUPPORT),y)
 objects += cc
+endif
+
+ifeq ($(CFG_HI_WFB_NG_SUPPORT),y)
+objects += wfb-ng
 endif
 
 ifeq ($(CFG_HI_WIFI_SUPPORT),y)
@@ -161,7 +166,9 @@ endif
 ifeq ($(CFG_HI_FFMPEF_SUPPORT),y)
 ffmpeg: x264
 endif
-
+ifeq ($(CFG_HI_WFB_NG_SUPPORT),y)
+wfb-ng: wifi libsodium
+endif
 clean: $(depends_clean)
 
 #==================================================================
