@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # SDK version: KERNELVERSION
-# Wed Oct 16 17:09:12 2024
+# Fri Oct 18 22:42:50 2024
 #
 
 #
@@ -1494,6 +1494,11 @@ CFG_HI_FFMPEF_SUPPORT=y
 #
 CFG_HI_PCRE_SUPPORT=y
 # CFG_HI_PCRE2_SUPPORT is not set
+
+#
+# WFB-NG Config
+#
+CFG_HI_WFB_NG_SUPPORT=y
 # CFG_HI_TEE_SUPPORT is not set
 
 #
