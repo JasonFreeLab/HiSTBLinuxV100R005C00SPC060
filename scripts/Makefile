@@ -226,6 +226,14 @@ ifeq ($(CFG_HI_WIFI_DEVICE_RTL8812AU),y)
 	$(AT)echo "insmod rtl8812au.ko" >> $(HI_MODULE_DIR)/load
 endif
 
+ifeq ($(CFG_HI_WIFI_DEVICE_RTL8812CU),y)
+	$(AT)echo "insmod rtl8812cu.ko" >> $(HI_MODULE_DIR)/load
+endif
+
+ifeq ($(CFG_HI_WIFI_DEVICE_RTL8812EU),y)
+	$(AT)echo "insmod rtl8812eu.ko" >> $(HI_MODULE_DIR)/load
+endif
+
 ifeq ($(CFG_HI_WIFI_DEVICE_RTL8822BS),y)
 	$(AT)echo "insmod rtl8822bs.ko" >> $(HI_MODULE_DIR)/load
 endif
@@ -487,6 +495,14 @@ endif
 
 ifeq ($(CFG_HI_WIFI_DEVICE_RTL8812AU),y)
 	$(AT)echo "rmmod rtl8812au.ko" >> $(HI_MODULE_DIR)/unload
+endif
+
+ifeq ($(CFG_HI_WIFI_DEVICE_RTL8812CU),y)
+	$(AT)echo "rmmod rtl8812cu.ko" >> $(HI_MODULE_DIR)/unload
+endif
+
+ifeq ($(CFG_HI_WIFI_DEVICE_RTL8812EU),y)
+	$(AT)echo "rmmod rtl8812eu.ko" >> $(HI_MODULE_DIR)/unload
 endif
 
 ifeq ($(CFG_HI_WIFI_DEVICE_RTL8822BS),y)

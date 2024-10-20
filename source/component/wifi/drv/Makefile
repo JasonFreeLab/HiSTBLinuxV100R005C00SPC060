@@ -42,6 +42,14 @@ ifeq ($(CFG_HI_WIFI_DEVICE_RTL8812AU),y)
 objects += usb_rtl8812au
 endif
 
+ifeq ($(CFG_HI_WIFI_DEVICE_RTL8812CU),y)
+objects += usb_rtl8812cu
+endif
+
+ifeq ($(CFG_HI_WIFI_DEVICE_RTL8812EU),y)
+objects += usb_rtl8812eu
+endif
+
 ifeq ($(CFG_HI_WIFI_DEVICE_RTL8812AE),y)
 objects += pcie_rtl8812ae
 endif

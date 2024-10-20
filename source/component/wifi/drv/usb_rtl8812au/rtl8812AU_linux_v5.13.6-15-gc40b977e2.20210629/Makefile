@@ -32,9 +32,9 @@ ifeq ($(GCC_VER_49),1)
 EXTRA_CFLAGS += -Wno-date-time	# Fix compile error && warning on gcc 4.9 and later
 endif
 
-RTL_8812AU_SRC=$(COMPONENT_DIR)/wifi/drv/usb_rtl8812au/rtl8812AU_linux_v5.13.6-15-gc40b977e2.20210629
+src := $(COMPONENT_DIR)/wifi/drv/usb_rtl8812au/rtl8812AU_linux_v5.13.6-15-gc40b977e2.20210629
 EXTRA_CFLAGS += -I$(src)/include
-EXTRA_CFLAGS += -I$(RTL_8812AU_SRC)/hal/phydm
+EXTRA_CFLAGS += -I$(src)/hal/phydm
 EXTRA_LDFLAGS += --strip-debug
 
 CONFIG_AUTOCFG_CP = n

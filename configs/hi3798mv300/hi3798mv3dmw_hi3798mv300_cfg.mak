@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # SDK version: KERNELVERSION
-# Fri Oct 18 22:42:50 2024
+# Sun Oct 20 19:33:54 2024
 #
 
 #
@@ -1459,6 +1459,8 @@ CFG_HI_WIFI_SUPPORT=y
 # CFG_HI_WIFI_DEVICE_RTL8192EU is not set
 # CFG_HI_WIFI_DEVICE_RTL8188FU is not set
 CFG_HI_WIFI_DEVICE_RTL8812AU=y
+# CFG_HI_WIFI_DEVICE_RTL8812CU is not set
+# CFG_HI_WIFI_DEVICE_RTL8812EU is not set
 # CFG_HI_WIFI_DEVICE_RTL8723BU is not set
 # CFG_HI_WIFI_DEVICE_RTL8822BU is not set
 # CFG_HI_WIFI_DEVICE_RTL8822BS is not set
