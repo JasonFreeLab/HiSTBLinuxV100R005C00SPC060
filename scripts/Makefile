@@ -238,6 +238,10 @@ ifeq ($(CFG_HI_WIFI_DEVICE_RTL8822BS),y)
 	$(AT)echo "insmod rtl8822bs.ko" >> $(HI_MODULE_DIR)/load
 endif
 
+ifeq ($(CFG_HI_WIFI_DEVICE_RTL8822CS),y)
+	$(AT)echo "insmod rtl8822cs.ko" >> $(HI_MODULE_DIR)/load
+endif
+
 	$(AT)echo "echo 2097152 > /proc/sys/net/core/rmem_max" >> $(HI_MODULE_DIR)/load
 
 ifndef CFG_HI_ADVCA_FUNCTION
@@ -507,6 +511,10 @@ endif
 
 ifeq ($(CFG_HI_WIFI_DEVICE_RTL8822BS),y)
 	$(AT)echo "rmmod rtl8822bs.ko" >> $(HI_MODULE_DIR)/unload
+endif
+
+ifeq ($(CFG_HI_WIFI_DEVICE_RTL8822CS),y)
+	$(AT)echo "rmmod rtl8822cs.ko" >> $(HI_MODULE_DIR)/unload
 endif
 
 	$(AT)chmod +x $(HI_MODULE_DIR)/unload

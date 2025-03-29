@@ -118,6 +118,10 @@ ifeq ($(CFG_HI_WIFI_DEVICE_RTL8822BS),y)
 objects += sdio_rtl8822bs
 endif
 
+ifeq ($(CFG_HI_WIFI_DEVICE_RTL8822CS),y)
+objects += sdio_rtl8822cs
+endif
+
 ifeq ($(CFG_HI_WIFI_DEVICE_MT7668BS),y)
 objects += sdio_mt7668bs
 endif
