@@ -1,1 +1,1 @@
-obj-y += rtl88x2CS_WiFi_linux_v5.15.8.6-4-gb27bf2ee3_COEX20221215-3130.20240508
+obj-y += rtl88x2CS_WiFi_linux_v5.15.8.6-4-gb27bf2ee3_COEX20221215-3130.20240508/
