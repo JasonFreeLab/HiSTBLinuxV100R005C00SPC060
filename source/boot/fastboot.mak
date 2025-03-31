@@ -289,22 +289,22 @@ copy_code:
 	$(AT)test ! -d $(CURRDIR)/auxcode || cp -rf $(CURRDIR)/auxcode $(OBJ_DIR)
 
 product: prepare
-	make -C $(FASTBOOT) $(MKFLAGS) $(BOOTCONFIG)_config
-	make -C $(PRODUCT) $(MKFLAGS) O=$(O)
+	make -j16 -C $(FASTBOOT) $(MKFLAGS) $(BOOTCONFIG)_config
+	make -j16 -C $(PRODUCT) $(MKFLAGS) O=$(O)
 
 auxcode: $(AUXIMG)
 ifeq ($(CONFIG_AUXCODE_COMPILE_SUPPORT),y)
 ifdef CONFIG_UNIFIED_BOOT
-	make -C $(AUXCODE) $(MKFLAGS) O=$(O) \
+	make -j16 -C $(AUXCODE) $(MKFLAGS) O=$(O) \
 	&& cp -rf $(AUXCODE)/auxcode_sign.img $(AUXIMG)
 endif
 endif
 
 fastboot: $(if $(CONFIG_PRODUCT_WITH_BOOT),product,prepare)
-	make -C $(FASTBOOT) $(MKFLAGS) $(BOOTCONFIG)
+	make -j16 -C $(FASTBOOT) $(MKFLAGS) $(BOOTCONFIG)
 
 mini-boot: fastboot
-	make -C $(FASTBOOT) $(MKFLAGS) mini-boot.bin
+	make -j16 -C $(FASTBOOT) $(MKFLAGS) mini-boot.bin
 
 advca_programmer_install: \
 		prepare \
@@ -329,9 +329,9 @@ ifeq ($(CFG_HI_SPI_SUPPORT)_$(CFG_HI_EMMC_SUPPORT),y_y)
 endif
 endif
 ifeq ($(OBJ_DIR),)
-	make -C $(PRODUCT)  $(MKFLAGS) clean
-	make -C $(FASTBOOT) $(MKFLAGS) distclean
-	make -C $(FASTBOOT) $(MKFLAGS) mini-boot.clean
+	make -j16 -C $(PRODUCT)  $(MKFLAGS) clean
+	make -j16 -C $(FASTBOOT) $(MKFLAGS) distclean
+	make -j16 -C $(FASTBOOT) $(MKFLAGS) mini-boot.clean
 	$(AT)rm -f $(FASTBOOT)/*.reg
 endif
 
@@ -559,13 +559,13 @@ ifeq ($(CFG_HI_SPI_SUPPORT)_$(CFG_HI_EMMC_SUPPORT),y_y)
 endif
 ifeq ($(OBJ_DIR),)
 ifeq ($(CONFIG_PRODUCT_WITH_BOOT),y)
-	make -C $(PRODUCT)  $(MKFLAGS) clean
+	make -j16 -C $(PRODUCT)  $(MKFLAGS) clean
 endif
-	make -C $(FASTBOOT) $(MKFLAGS) distclean
-	make -C $(FASTBOOT) $(MKFLAGS) mini-boot.clean
+	make -j16 -C $(FASTBOOT) $(MKFLAGS) distclean
+	make -j16 -C $(FASTBOOT) $(MKFLAGS) mini-boot.clean
 ifeq ($(CFG_HI_UNIFIED_BOOT_SUPPORT),y)
 ifeq ($(CONFIG_AUXCODE_COMPILE_SUPPORT),y)
-	make -C $(AUXCODE) $(MKFLAGS) clean
+	make -j16 -C $(AUXCODE) $(MKFLAGS) clean
 endif
 endif
 	$(AT)rm -f $(FASTBOOT)/*.reg
