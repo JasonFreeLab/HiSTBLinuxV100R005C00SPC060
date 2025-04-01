@@ -29,27 +29,27 @@ endif
 .PHONY: all clean
 
 all:
-	$(AT)make -C api all
+	$(AT)make -j16 -C api all
 ifeq ($(CFG_HI_LOADER_APPLOADER),y)
 ifeq ($(CFG_HI_ADVCA_SUPPORT), y)
 ifeq ($(CFG_HI_ADVCA_TYPE), VERIMATRIX)
 ifneq ($(VMX_LIB_EXIST),y)
-	$(AT)make -C $(VMX_SRC_DIR)
+	$(AT)make -j16 -C $(VMX_SRC_DIR)
 endif
 endif
 endif
-	$(AT)make -C app all
+	$(AT)make -j16 -C app all
 endif
 
 clean:
-	$(AT)make -C api clean
+	$(AT)make -j16 -C api clean
 ifeq ($(CFG_HI_LOADER_APPLOADER),y)
-	$(AT)make -C app clean
+	$(AT)make -j16 -C app clean
 ifeq ($(CFG_HI_ADVCA_TYPE), VERIMATRIX)
 ifeq ($(CFG_HI_ADVCA_VMX_3RD_SIGN),y)
-	$(AT)make -C api/src/harden/vmx_advance/3rd_loader_verify_lib clean
+	$(AT)make -j16 -C api/src/harden/vmx_advance/3rd_loader_verify_lib clean
 else
-	$(AT)make -C api/src/harden/vmx_advance/vmx_loader_verify_lib clean
+	$(AT)make -j16 -C api/src/harden/vmx_advance/vmx_loader_verify_lib clean
 endif
 endif
 endif

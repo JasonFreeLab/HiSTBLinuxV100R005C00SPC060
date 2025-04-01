@@ -35,7 +35,7 @@ $(PREFIX)/bin/udevd $(PREFIX)/bin/udevadm: $(UDEV_DIR)/$(UDEV)/udev/udevd
 	$(AT)install -v -t $(@D) $(UDEV_DIR)/$(UDEV)/udev/udevadm
 
 $(UDEV_DIR)/$(UDEV)/udev/udevd: $(UDEV_DIR)/tar
-	$(AT)make -C $(UDEV_DIR)/$(UDEV) USE_STATIC=false
+	$(AT)make -j16 -C $(UDEV_DIR)/$(UDEV) USE_STATIC=false
 
 ################################################################################
 $(UDEV_DIR)/tar:

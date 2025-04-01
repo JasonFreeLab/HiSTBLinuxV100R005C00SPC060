@@ -55,14 +55,14 @@ clean:
 #+++++++++++compile root directory busybox (located in /bin)+++++++++++++
 $(PREFIX)/bin/busybox: $(BUSYBOX_DIR)/$(BUSYBOX)/tar
 	$(AT)cd $(BUSYBOX_DIR)/$(BUSYBOX) \
-        && make $(MKFLAGS) CONFIG_PREFIX=$(PREFIX) \
-        && make $(MKFLAGS) CONFIG_PREFIX=$(PREFIX) install
+        && make -j16 $(MKFLAGS) CONFIG_PREFIX=$(PREFIX) \
+        && make -j16 $(MKFLAGS) CONFIG_PREFIX=$(PREFIX) install
 
 #+++++++++++compile sandbox user busybox (located in /home/stb/bin)+++++++++++++
 $(PREFIX)/home/stb/bin/busybox: $(SANDBOX_DIR)/$(BUSYBOX)/tar
 	$(AT)cd $(SANDBOX_DIR)/$(BUSYBOX) \
-        && make $(MKFLAGS) CONFIG_PREFIX=$(CONFIG_SANDBOX_ROOTFS_PATH) \
-        && make $(MKFLAGS) CONFIG_PREFIX=$(CONFIG_SANDBOX_ROOTFS_PATH) install
+        && make -j16 $(MKFLAGS) CONFIG_PREFIX=$(CONFIG_SANDBOX_ROOTFS_PATH) \
+        && make -j16 $(MKFLAGS) CONFIG_PREFIX=$(CONFIG_SANDBOX_ROOTFS_PATH) install
 
 $(BUSYBOX_DIR)/$(BUSYBOX)/tar:
 	$(AT)test -d $(BUSYBOX_DIR) || mkdir -p $(BUSYBOX_DIR)

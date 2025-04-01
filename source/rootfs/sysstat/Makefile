@@ -40,7 +40,7 @@ $(TOP_DIR)/$(SYSSTAT)/mpstat: $(TOP_DIR)/tar
 	cd $(TOP_DIR)/$(SYSSTAT) && \
 		./configure --host=$(HOST) --prefix=$(BUILD_DIR) \
 			--exec-prefix=$(BUILD_DIR) CFLAGS="-static" && \
-		make
+		make -j16
 
 ################################################################################
 $(TOP_DIR)/tar:

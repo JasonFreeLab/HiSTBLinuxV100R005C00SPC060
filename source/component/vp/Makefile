@@ -4,9 +4,9 @@
 .PHONY: all clean
 
 all:
-	$(AT)make -C src
-	$(AT)make -C rtp
+	$(AT)make -j16 -C src
+	$(AT)make -j16 -C rtp
 
 clean:
-	$(AT)make -C rtp clean
-	$(AT)make -C src clean
+	$(AT)make -j16 -C rtp clean
+	$(AT)make -j16 -C src clean

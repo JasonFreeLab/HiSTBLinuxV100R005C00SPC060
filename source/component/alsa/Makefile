@@ -66,16 +66,16 @@ clean:
 	$(AT)rm -rf $(HI_SHARED_LIB64_DIR)/libasound.so*
 
 alsa_utils: $(ALSA_LIB_DIR)/$(ALSA_UTILS)/tar
-	$(AT)cd $(ALSA_LIB_DIR)/$(ALSA_UTILS) && make && make DESTDIR=$(INSTALL_DIR) install-strip
+	$(AT)cd $(ALSA_LIB_DIR)/$(ALSA_UTILS) && make -j16 && make -j16 DESTDIR=$(INSTALL_DIR) install-strip
 
 alsa_utils64: $(ALSA_LIB64_DIR)/$(ALSA_UTILS)/tar
-	$(AT)cd $(ALSA_LIB64_DIR)/$(ALSA_UTILS) && make && make DESTDIR=$(INSTALL_DIR64) install-strip
+	$(AT)cd $(ALSA_LIB64_DIR)/$(ALSA_UTILS) && make -j16 && make -j16 DESTDIR=$(INSTALL_DIR64) install-strip
 
 alsa_lib: $(ALSA_LIB_DIR)/$(ALSA_LIB)/tar
-	$(AT)cd $(ALSA_LIB_DIR)/$(ALSA_LIB) && make && make DESTDIR=$(INSTALL_DIR) install-strip
+	$(AT)cd $(ALSA_LIB_DIR)/$(ALSA_LIB) && make -j16 && make -j16 DESTDIR=$(INSTALL_DIR) install-strip
 
 alsa_lib64: $(ALSA_LIB64_DIR)/$(ALSA_LIB)/tar
-	$(AT)cd $(ALSA_LIB64_DIR)/$(ALSA_LIB) && make && make DESTDIR=$(INSTALL_DIR64) install-strip
+	$(AT)cd $(ALSA_LIB64_DIR)/$(ALSA_LIB) && make -j16 && make -j16 DESTDIR=$(INSTALL_DIR64) install-strip
 
 $(ALSA_LIB_DIR)/$(ALSA_LIB)/tar:
 	$(AT)test -d $(INSTALL_DIR) || mkdir -p $(INSTALL_DIR)

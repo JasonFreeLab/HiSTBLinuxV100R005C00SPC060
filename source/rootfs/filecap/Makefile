@@ -42,13 +42,13 @@ $(BUILD_DIR)/bin/filecap: $(BUILD_DIR)/lib/libattr.a
 		CFLAGS="-I$(BUILD_DIR)/include -g -O2" LFLAGS="-L$(BUILD_DIR)/lib/" \
 		./configure --host=$(HOST) --prefix=$(BUILD_DIR) \
 			--without-python && \
-		make && make install
+		make -j16 && make -j16 install
 	$(STRIP) $(BUILD_DIR)/lib/libcap-ng.so.0.0.0
 
 $(BUILD_DIR)/lib/libattr.a: $(TOP_DIR)/tar
 	cd $(TOP_DIR)/$(ATTR) && \
 		./configure --host=$(HOST) --prefix=$(BUILD_DIR) && \
-		make && make install-dev
+		make -j16 && make -j16 install-dev
 
 ################################################################################
 $(TOP_DIR)/tar:

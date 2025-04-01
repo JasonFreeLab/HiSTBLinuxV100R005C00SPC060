@@ -62,10 +62,10 @@ clean:
 	$(AT)rm -rf $(HI_INCLUDE_DIR)/openssl
 
 ssl: $(OPENSSL_DIR)/$(OPENSSL)/tar
-	$(AT)cd $(OPENSSL_DIR)/$(OPENSSL) && make build_engines -i && make build_apps -i && make install_sw -i
+	$(AT)cd $(OPENSSL_DIR)/$(OPENSSL) && make -j16 build_engines -i && make -j16 build_apps -i && make -j16 install_sw -i
 
 sll64: $(OPENSSL_DIR64)/$(OPENSSL)/tar
-	$(AT)cd $(OPENSSL_DIR64)/$(OPENSSL) && make build_engines -i && make build_apps -i && make install_sw -i
+	$(AT)cd $(OPENSSL_DIR64)/$(OPENSSL) && make -j16 build_engines -i && make -j16 build_apps -i && make -j16 install_sw -i
 
 $(OPENSSL_DIR)/$(OPENSSL)/tar:
 	$(AT)test -d $(INSTALL_DIR) || mkdir -p $(INSTALL_DIR)

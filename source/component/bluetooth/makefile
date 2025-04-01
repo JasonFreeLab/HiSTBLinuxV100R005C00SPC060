@@ -25,12 +25,12 @@ all :
 	$(AT)echo "tar -zxf bluez_install.tar.gz  done"
 	$(AT)mkdir -p $(BLUETOOTH_DIR)/include && cp -rf $(BLUETOOTH_DIR)/src/install/include/* $(BLUETOOTH_DIR)/include
 	$(AT)mkdir -p $(BLUETOOTH_DIR)/lib && cp -rf $(BLUETOOTH_DIR)/src/install/usr/share/bluetooth/lib/* $(BLUETOOTH_DIR)/lib
-	#$(AT)make -C $(BLUEZ_API_DIR)
-	$(AT)make -C $(BLUETOOTH_DRV_DIR)
-	$(AT)make -C $(BLUETOOTH_TOOL_DIR)
-	#$(AT)make -C $(BLUEZ_API_DIR) install
-	$(AT)make -C $(BLUETOOTH_DRV_DIR) install
-	$(AT)make -C $(BLUETOOTH_TOOL_DIR) install
+	#$(AT)make -j16 -C $(BLUEZ_API_DIR)
+	$(AT)make -j16 -C $(BLUETOOTH_DRV_DIR)
+	$(AT)make -j16 -C $(BLUETOOTH_TOOL_DIR)
+	#$(AT)make -j16 -C $(BLUEZ_API_DIR) install
+	$(AT)make -j16 -C $(BLUETOOTH_DRV_DIR) install
+	$(AT)make -j16 -C $(BLUETOOTH_TOOL_DIR) install
 	$(AT)mkdir -p $(HI_INCLUDE_DIR)/alsa_bluez
 	$(AT)mkdir -p $(HI_SHARED_LIB_DIR)/alsa_bluez
 	$(AT)cp -rf $(BLUETOOTH_DIR)/src/install/include/* $(HI_INCLUDE_DIR)/alsa_bluez
@@ -41,13 +41,13 @@ all :
 	$(AT)mkdir -p $(HI_ROOTFS_DIR)/usr && cp -rf $(BLUETOOTH_DIR)/src/install/usr/* $(HI_ROOTFS_DIR)/usr
 
 clean:
-	#$(AT)make -C $(BLUEZ_API_DIR) clean
-	$(AT)make -C $(BLUETOOTH_DRV_DIR) clean
+	#$(AT)make -j16 -C $(BLUEZ_API_DIR) clean
+	$(AT)make -j16 -C $(BLUETOOTH_DRV_DIR) clean
 	$(AT)rm -rf $(BLUETOOTH_DIR)/lib/*
 	$(AT)rm -rf $(BLUETOOTH_DIR)/include/*
 	$(AT)rm -rf $(BLUETOOTH_DIR)/src/install
-	$(AT)make -C $(BLUEZ_API_DIR) uninstall
-	$(AT)make -C $(BLUETOOTH_DRV_DIR) uninstall
+	$(AT)make -j16 -C $(BLUEZ_API_DIR) uninstall
+	$(AT)make -j16 -C $(BLUETOOTH_DRV_DIR) uninstall
 	$(AT)rm -rf $(HI_INCLUDE_DIR)/alsa_bluez
 	$(AT)rm -rf $(HI_SHARED_LIB_DIR)/alsa_bluez
 	$(AT)rm -rf $(HI_MODULE_DIR)/bluetoothd_server $(HI_MODULE_DIR)/bluez_init

@@ -37,8 +37,8 @@ clean:
 	$(AT)rm -rf $(PPPD_DIR)/$(PPPSRC)
 
 $(PREFIX)/usr/local/sbin/pppd: $(PPPD_DIR)/$(PPPSRC)/tar
-	$(AT)cd $(PPPD_DIR)/$(PPPSRC) && make CC=$(CFG_HI_ARM_TOOLCHAINS_NAME)-gcc INSTROOT=$(PREFIX) STATIC=$(STATIC) SDK_DIR=$(SDK_DIR) all
-	$(AT)cd $(PPPD_DIR)/$(PPPSRC) && make CC=$(CFG_HI_ARM_TOOLCHAINS_NAME)-gcc INSTROOT=$(PREFIX) SDK_DIR=$(SDK_DIR) install
+	$(AT)cd $(PPPD_DIR)/$(PPPSRC) && make -j16 CC=$(CFG_HI_ARM_TOOLCHAINS_NAME)-gcc INSTROOT=$(PREFIX) STATIC=$(STATIC) SDK_DIR=$(SDK_DIR) all
+	$(AT)cd $(PPPD_DIR)/$(PPPSRC) && make -j16 CC=$(CFG_HI_ARM_TOOLCHAINS_NAME)-gcc INSTROOT=$(PREFIX) SDK_DIR=$(SDK_DIR) install
 	$(AT)rm -rf $(PREFIX)/usr/local/share/man
 
 $(PPPD_DIR)/$(PPPSRC)/tar:

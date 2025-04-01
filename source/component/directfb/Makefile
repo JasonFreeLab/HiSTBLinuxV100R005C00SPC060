@@ -185,10 +185,10 @@ clean:
 	$(AT)rm -rf $(HI_EXTERN_LIB64_DIR)/directfb-1.6-0
 
 directfb: $(DIRECTFB_OUT_DIR)/$(DIRECTFB)/tar
-	$(AT)cd $(DIRECTFB_OUT_DIR)/$(DIRECTFB) && make DESTDIR=$(INSTALL_DIR) install
+	$(AT)cd $(DIRECTFB_OUT_DIR)/$(DIRECTFB) && make -j16 DESTDIR=$(INSTALL_DIR) install
 
 directfb64: $(DIRECTFB_OUT_DIR64)/$(DIRECTFB)/tar
-	$(AT)cd $(DIRECTFB_OUT_DIR64)/$(DIRECTFB) && make DESTDIR=$(INSTALL_DIR64) install
+	$(AT)cd $(DIRECTFB_OUT_DIR64)/$(DIRECTFB) && make -j16 DESTDIR=$(INSTALL_DIR64) install
 
 $(DIRECTFB_OUT_DIR)/$(DIRECTFB)/tar:
 	$(AT)test -d $(INSTALL_DIR) || mkdir -p $(INSTALL_DIR)
@@ -247,7 +247,7 @@ $(DIRECTFB_OUT_DIR64)/$(DIRECTFB)/tar:
 	$(AT)touch $@
 
 fusion: $(FUSION_OUT_DIR)/$(FUSION)/tar
-	$(AT)make -C $(FUSION_OUT_DIR)/$(FUSION) SDK_DIR=$(SDK_DIR) FUSION_DIR=$(FUSION_OUT_DIR)/$(FUSION)
+	$(AT)make -j16 -C $(FUSION_OUT_DIR)/$(FUSION) SDK_DIR=$(SDK_DIR) FUSION_DIR=$(FUSION_OUT_DIR)/$(FUSION)
 
 $(FUSION_OUT_DIR)/$(FUSION)/tar:
 	$(AT)test -d $(FUSION_OUT_DIR) || mkdir -p $(FUSION_OUT_DIR)

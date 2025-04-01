@@ -35,7 +35,7 @@ $(PREFIX)/sbin/iperf3: $(TOP_DIR)/$(IPERF)/src/iperf3
 $(TOP_DIR)/$(IPERF)/src/iperf3: $(TOP_DIR)/tar
 	$(AT)cd $(TOP_DIR)/$(IPERF) && \
 		./configure CC=gcc CPP="gcc -E" && \
-		make CC=$(CFG_HI_ARM_TOOLCHAINS_NAME)-gcc CXX=$(CFG_HI_ARM_TOOLCHAINS_NAME)-g++ LDFLAGS="-static"
+		make -j16 CC=$(CFG_HI_ARM_TOOLCHAINS_NAME)-gcc CXX=$(CFG_HI_ARM_TOOLCHAINS_NAME)-g++ LDFLAGS="-static"
 
 ################################################################################
 $(TOP_DIR)/tar:

@@ -44,7 +44,7 @@ $(BUILD_DIR)/sbin/xtables-multi: $(TOP_DIR)/tar
 			-enable-static -disable-shared --disable-nftables \
 			--datarootdir=$(BUILD_DIR)     \
 			--includedir=$(BUILD_DIR)&& \
-		make && make install
+		make -j16 && make -j16 install
 
 ################################################################################
 $(TOP_DIR)/tar:

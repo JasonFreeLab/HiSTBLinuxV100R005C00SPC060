@@ -31,7 +31,7 @@ clean: $(objects_clean)
 .PHONY: $(objects) $(objects_clean)
 
 $(objects):
-	make -C $@ all
+	make -j16 -C $@ all
 
 $(objects_clean):
-	make -C $(patsubst %_clean,%,$@) clean
+	make -j16 -C $(patsubst %_clean,%,$@) clean

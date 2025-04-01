@@ -162,10 +162,10 @@ clean:
 	$(AT)rm -rf $(PNG_OUT_DIR)/$(LIBPNG_NAME)/tar
 
 libpng: $(PNG_OUT_DIR)/$(LIBPNG_NAME)/tar
-	$(AT)cd $(PNG_OUT_DIR)/$(LIBPNG_NAME) && make install-libLTLIBRARIES
+	$(AT)cd $(PNG_OUT_DIR)/$(LIBPNG_NAME) && make -j16 install-libLTLIBRARIES
 
 libpng64: $(PNG_OUT_DIR64)/$(LIBPNG_NAME)/tar
-	$(AT)cd $(PNG_OUT_DIR64)/$(LIBPNG_NAME) && make install-libLTLIBRARIES
+	$(AT)cd $(PNG_OUT_DIR64)/$(LIBPNG_NAME) && make -j16 install-libLTLIBRARIES
 
 $(PNG_OUT_DIR)/$(LIBPNG_NAME)/tar:
 	$(AT)test -d $(INSTALL_DIR) || mkdir -p $(INSTALL_DIR)

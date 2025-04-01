@@ -82,10 +82,10 @@ clean:
 	$(AT)rm -rf $(HI_STATIC_LIB64_DIR)/libharfbuzz.a $(HI_SHARED_LIB64_DIR)/libharfbuzz.so*
 
 harfbuzz: $(HARFBUZZ_DIR)/$(HARFBUZZ)/tar
-	$(AT)cd $(HARFBUZZ_DIR)/$(HARFBUZZ) && make && make install
+	$(AT)cd $(HARFBUZZ_DIR)/$(HARFBUZZ) && make -j16 && make -j16 install
 
 harfbuzz64: $(HARFBUZZ_DIR64)/$(HARFBUZZ)/tar
-	$(AT)cd $(HARFBUZZ_DIR64)/$(HARFBUZZ) && make && make install
+	$(AT)cd $(HARFBUZZ_DIR64)/$(HARFBUZZ) && make -j16 && make -j16 install
 
 $(HARFBUZZ_DIR)/$(HARFBUZZ)/tar:
 	$(AT)test -d $(INSTALL_DIR) || mkdir -p $(INSTALL_DIR)

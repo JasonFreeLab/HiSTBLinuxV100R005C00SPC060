@@ -34,7 +34,7 @@ $(PREFIX)/sbin/fsck.fat: $(DOSFSTOOLS_DIR)/$(DOSFS)/fsck.fat
 	$(AT)install -v -t $(@D) $<
 
 $(DOSFSTOOLS_DIR)/$(DOSFS)/fsck.fat: $(DOSFSTOOLS_DIR)/$(DOSFS)/tar
-	$(AT)cd $(DOSFSTOOLS_DIR)/$(DOSFS) && make CC=$(CFG_HI_ARM_TOOLCHAINS_NAME)-gcc
+	$(AT)cd $(DOSFSTOOLS_DIR)/$(DOSFS) && make -j16 CC=$(CFG_HI_ARM_TOOLCHAINS_NAME)-gcc
 
 $(DOSFSTOOLS_DIR)/$(DOSFS)/tar:
 	$(AT)test -d $(DOSFSTOOLS_DIR) || mkdir -p $(DOSFSTOOLS_DIR)

@@ -170,10 +170,10 @@ clean:
 	$(AT)rm -rf $(JPEG_OUT_DIR)/$(LIBJPEG_NAME)/tar
 
 libjpeg: $(JPEG_OUT_DIR)/$(LIBJPEG_NAME)/tar
-	$(AT)cd $(JPEG_OUT_DIR)/$(LIBJPEG_NAME) && make && make install
+	$(AT)cd $(JPEG_OUT_DIR)/$(LIBJPEG_NAME) && make -j16 && make -j16 install
 
 libjpeg64: $(JPEG_OUT_DIR64)/$(LIBJPEG_NAME)/tar
-	$(AT)cd $(JPEG_OUT_DIR64)/$(LIBJPEG_NAME) && make && make install
+	$(AT)cd $(JPEG_OUT_DIR64)/$(LIBJPEG_NAME) && make -j16 && make -j16 install
 
 $(JPEG_OUT_DIR)/$(LIBJPEG_NAME)/tar:
 	$(AT)test -d $(INSTALL_DIR) || mkdir -p $(INSTALL_DIR)

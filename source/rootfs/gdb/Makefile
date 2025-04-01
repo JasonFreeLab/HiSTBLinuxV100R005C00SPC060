@@ -43,14 +43,14 @@ $(PREFIX)/bin/gdb: $(BUILD_DIR)/bin/gdb
 	$(AT)install -v -t $(dir $@) $(BUILD_DIR)/bin/gdbserver
 
 $(BUILD_DIR)/bin/gdb: $(GDB_DIR)/$(GDB)/tar $(BUILD_DIR)/lib/libncurses.a
-	$(AT)cd $(GDB_DIR)/$(GDB) && make $(MKFLAGS)
+	$(AT)cd $(GDB_DIR)/$(GDB) && make -j16 $(MKFLAGS)
 	$(AT)cp $(GDB_DIR)/$(GDB)/gdb/gdb $(BUILD_DIR)/bin
 	$(AT)cp -f $(GDB_DIR)/$(GDB)/gdb/gdbserver/gdbserver $(BUILD_DIR)/bin
 	$(AT)cp -f $(GDB_DIR)/$(GDB)/opcodes/libopcodes.a $(BUILD_DIR)/lib
 	$(AT)cp -f $(GDB_DIR)/$(GDB)/bfd/libbfd.a $(BUILD_DIR)/lib
 
 $(BUILD_DIR)/lib/libncurses.a: $(GDB_DIR)/$(NCURSES)/tar
-	$(AT)cd $(GDB_DIR)/$(NCURSES) && make $(MKFLAGS) && make install
+	$(AT)cd $(GDB_DIR)/$(NCURSES) && make -j16 $(MKFLAGS) && make -j16 install
 
 ################################################################################
 $(GDB_DIR)/$(GDB)/tar:

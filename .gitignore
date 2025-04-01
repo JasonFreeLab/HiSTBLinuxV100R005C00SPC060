@@ -18,5 +18,5 @@ source/kernel/linux-4.4.y/drivers/wifi
 # source/kernel/linux-4.4.y/scripts/kconfig/
 source/kernel/linux-4.4.y/.config
 
-#bulid.log
-bulid.log
+#build.log
+build.log

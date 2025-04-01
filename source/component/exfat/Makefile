@@ -55,8 +55,8 @@ $(addprefix $(BUILD_DIR)/,$(exFAT_utils_tgt)): $(EXFAT_DIR)/$(EXFAT)/build_finis
 	@
 
 $(EXFAT_DIR)/$(EXFAT)/build_finish: $(EXFAT_DIR)/$(EXFAT)/tar $(BUILD_DIR)/lib/libfuse.a
-	$(AT)make -C $(EXFAT_DIR)/$(EXFAT) CROSS_COMPILE=$(CROSS_COMPILE) FUSE_PATH="$(BUILD_DIR)" EXFAT_PATH="$(BUILD_DIR)/$(EXFAT)"
-	$(AT)make -C $(EXFAT_DIR)/$(EXFAT) install CROSS_COMPILE=$(CROSS_COMPILE) PREFIX=$(BUILD_DIR)
+	$(AT)make -j16 -C $(EXFAT_DIR)/$(EXFAT) CROSS_COMPILE=$(CROSS_COMPILE) FUSE_PATH="$(BUILD_DIR)" EXFAT_PATH="$(BUILD_DIR)/$(EXFAT)"
+	$(AT)make -j16 -C $(EXFAT_DIR)/$(EXFAT) install CROSS_COMPILE=$(CROSS_COMPILE) PREFIX=$(BUILD_DIR)
 	$(AT)touch $@
 
 ################################################################################
@@ -65,7 +65,7 @@ $(BUILD_DIR)/lib/libfuse.a: $(EXFAT_DIR)/$(LIBFUSE)/build_finish
 	@
 
 $(EXFAT_DIR)/$(LIBFUSE)/build_finish: $(EXFAT_DIR)/$(LIBFUSE)/tar
-	$(AT)cd $(EXFAT_DIR)/$(LIBFUSE) && make && make install
+	$(AT)cd $(EXFAT_DIR)/$(LIBFUSE) && make -j16 && make -j16 install
 	$(AT)touch $@
 
 $(EXFAT_DIR)/$(EXFAT)/tar:

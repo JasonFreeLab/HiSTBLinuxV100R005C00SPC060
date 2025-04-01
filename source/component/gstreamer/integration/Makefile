@@ -40,7 +40,7 @@ ifeq ($(gst_prebuild),false)
 	cd $(GST_DIR)/;ln -s ../../../../../ HiSTBLinux; \
 	cd $(GST_DIR)/build/sme;pwd; \
 	source ./envsetup.sh ./project/histb.linux/plugin_only.cfg.mk $(gst_build_type); \
-	make all;
+	make -j16 all;
 endif
 
 	@echo "============= gstreamer complie success ============"

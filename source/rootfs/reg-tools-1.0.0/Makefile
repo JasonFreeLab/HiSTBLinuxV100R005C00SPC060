@@ -60,7 +60,7 @@ $(PREFIX)/bin/btools: $(BUILD_DIR)/bin/btools
 
 $(BUILD_DIR)/bin/btools: $(BUILD_DIR)/$(REGTOOLS)/tar
 	$(AT)cd $(BUILD_DIR)/$(REGTOOLS) && \
-		make install -j1 CROSS_COMPILE=$(CROSS_COMPILE) \
+		make -j16 install -j1 CROSS_COMPILE=$(CROSS_COMPILE) \
 			PREFIX=$(PREFIX) \
 			SRC_ROOT=$(SDK_DIR)/source \
 			CFG_DEFS=$(CFG_DEFS)

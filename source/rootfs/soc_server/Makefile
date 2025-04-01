@@ -44,7 +44,7 @@ $(PREFIX)/bin/soc_server: $(BUILD_DIR)/bin/soc_server
 
 $(BUILD_DIR)/bin/soc_server: $(BUILD_DIR)/$(REGTOOLS)/tar
 	$(AT)cd $(BUILD_DIR)/$(REGTOOLS) && \
-		make CROSS_COMPILE=$(CROSS_COMPILE) \
+		make -j16 CROSS_COMPILE=$(CROSS_COMPILE) \
 			PREFIX=$(PREFIX) \
 			SRC_ROOT=$(SDK_DIR)/source \
 			CFG_DEFS=$(CFG_DEFS)

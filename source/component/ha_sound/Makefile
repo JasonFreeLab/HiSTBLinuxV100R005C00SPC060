@@ -51,13 +51,13 @@ uninstall:${depends_uninstall}
 .PHONY: ${objects} ${objects_clean} ${objects_install} ${objects_uninstall}
 
 ${objects}:
-	make -C $@ all 
+	make -j16 -C $@ all 
 
 ${objects_clean}:
-	make -C $(patsubst %_clean,%,$@) clean
+	make -j16 -C $(patsubst %_clean,%,$@) clean
 
 ${objects_install}:
-	make -C $(patsubst %_install,%,$@) install
+	make -j16 -C $(patsubst %_install,%,$@) install
 
 ${objects_uninstall}:
-	make -C $(patsubst %_uninstall,%,$@) uninstall
+	make -j16 -C $(patsubst %_uninstall,%,$@) uninstall

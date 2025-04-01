@@ -61,10 +61,10 @@ clean:
 	$(AT)rm -rf $(HI_STATIC_LIB64_DIR)/libcurl.a $(HI_SHARED_LIB64_DIR)/libcurl.so*
 
 curl: $(CURL_DIR)/$(CURL)/tar
-	$(AT)cd $(CURL_DIR)/$(CURL) && make && make install
+	$(AT)cd $(CURL_DIR)/$(CURL) && make -j16 && make -j16 install
 
 curl64: $(CURL_DIR64)/$(CURL)/tar
-	$(AT)cd $(CURL_DIR64)/$(CURL) && make && make install
+	$(AT)cd $(CURL_DIR64)/$(CURL) && make -j16 && make -j16 install
 
 $(CURL_DIR)/$(CURL)/tar:
 	$(AT)test -d $(INSTALL_DIR) || mkdir -p $(INSTALL_DIR)

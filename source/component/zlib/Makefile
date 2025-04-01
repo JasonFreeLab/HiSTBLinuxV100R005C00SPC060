@@ -59,10 +59,10 @@ clean:
 	$(AT)rm -rf $(HI_STATIC_LIB64_DIR)/libz.a $(HI_SHARED_LIB64_DIR)/libz.so*
 
 zlib: $(ZLIB_DIR)/$(ZLIB)/tar
-	$(AT)cd $(ZLIB_DIR)/$(ZLIB) && make install
+	$(AT)cd $(ZLIB_DIR)/$(ZLIB) && make -j16 install
 
 zlib64: $(ZLIB_DIR64)/$(ZLIB)/tar
-	$(AT)cd $(ZLIB_DIR64)/$(ZLIB) && make install
+	$(AT)cd $(ZLIB_DIR64)/$(ZLIB) && make -j16 install
 
 $(ZLIB_DIR)/$(ZLIB)/tar:
 	$(AT)test -d $(INSTALL_DIR) || mkdir -p $(INSTALL_DIR)

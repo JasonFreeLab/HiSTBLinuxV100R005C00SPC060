@@ -35,7 +35,7 @@ $(PREFIX)/sbin/mke2fs: $(BUILD_DIR)/sbin/mke2fs
 	$(AT)install -v -t $(@D) $(BUILD_DIR)/sbin/blkid
 
 $(BUILD_DIR)/sbin/mke2fs: $(E2FSPROGS_DIR)/$(E2FSPROGS)/tar
-	$(AT)cd $(E2FSPROGS_DIR)/$(E2FSPROGS) && make && make install-progs-recursive
+	$(AT)cd $(E2FSPROGS_DIR)/$(E2FSPROGS) && make -j16 && make -j16 install-progs-recursive
 
 $(E2FSPROGS_DIR)/$(E2FSPROGS)/tar:
 	$(AT)test -d $(E2FSPROGS_DIR) || mkdir -p $(E2FSPROGS_DIR)

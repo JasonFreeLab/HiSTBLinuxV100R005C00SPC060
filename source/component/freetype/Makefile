@@ -25,7 +25,7 @@ ifeq ($(CFG_HI_OPTM_SIZE_SUPPORT),y)
 #CFLAGS += -Os -ffunction-sections
 endif
 
-##µ±¸ß°²Ñ¡Ïî´ò¿ªÊ±£¬ÓÉÓÚ¸ß°²ÒªÇóSDK api²»±àÒë¾²Ì¬¿â£¬ËùÒÔSDK¶¥²ãMakefileÖÐ°Ñ-fPICÈ¥µôÁË£¬µ«¶ÔÓÚ×ÖÌå¿âÀ´Ëµ£¬Ï£ÍûÄÜÊ¹ÓÃ¶¯Ì¬¿â£¬ËùÒÔÒª±àÒëÊ±ÒªÍ¨¹ý´ËÅÐ¶ÏÔö¼Ó-fPIC
+##ï¿½ï¿½ï¿½ß°ï¿½Ñ¡ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½Ú¸ß°ï¿½Òªï¿½ï¿½SDK apiï¿½ï¿½ï¿½ï¿½ï¿½ë¾²Ì¬ï¿½â£¬ï¿½ï¿½ï¿½ï¿½SDKï¿½ï¿½ï¿½ï¿½Makefileï¿½Ð°ï¿½-fPICÈ¥ï¿½ï¿½ï¿½Ë£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ëµï¿½ï¿½Ï£ï¿½ï¿½ï¿½ï¿½Ê¹ï¿½Ã¶ï¿½Ì¬ï¿½â£¬ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½Ê±ÒªÍ¨ï¿½ï¿½ï¿½ï¿½ï¿½Ð¶ï¿½ï¿½ï¿½ï¿½ï¿½-fPIC
 ifneq ($(findstring -fPIC, $(CFG_HI_CFLAGS)), -fPIC)
 CFLAGS += -fPIC
 endif
@@ -100,11 +100,11 @@ clean:
 
 freetype: $(FREETYPE_DIR)/$(FREETYPE)/tar
 	$(AT)mkdir -p $(INSTALL_DIR)/include/freetype2/freetype/config
-	$(AT)cd $(FREETYPE_DIR)/$(FREETYPE) && make && make install
+	$(AT)cd $(FREETYPE_DIR)/$(FREETYPE) && make -j16 && make -j16 install
 
 freetype64: $(FREETYPE_DIR64)/$(FREETYPE)/tar
 	$(AT)mkdir -p $(INSTALL_DIR64)/include/freetype2/freetype/config
-	$(AT)cd $(FREETYPE_DIR64)/$(FREETYPE) && make && make install
+	$(AT)cd $(FREETYPE_DIR64)/$(FREETYPE) && make -j16 && make -j16 install
 
 $(FREETYPE_DIR)/$(FREETYPE)/tar:
 	$(AT)test -d $(INSTALL_DIR) || mkdir -p $(INSTALL_DIR)

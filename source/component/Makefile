@@ -179,37 +179,37 @@ clean: $(depends_clean)
 .PHONY: $(depends) $(objects_clean)
 
 $(objects):
-	$(AT)make -C $@ all
+	$(AT)make -j16 -C $@ all
 
 $(objects_clean):
-	$(AT)make -C $(patsubst %_clean,%,$@) clean
+	$(AT)make -j16 -C $(patsubst %_clean,%,$@) clean
 
 loader: freetype harfbuzz $(if $(findstring $(CFG_HI_CURL_SUPPORT),y),curl,)
-	$(AT)make -C loader all
+	$(AT)make -j16 -C loader all
 
 loader_clean:
-	$(AT)make -C loader clean
+	$(AT)make -j16 -C loader clean
 
 hiplayer:
-	$(AT)test ! -d hiplayer || make -C hiplayer all
+	$(AT)test ! -d hiplayer || make -j16 -C hiplayer all
 
 hiplayer_clean:
-	$(AT)test ! -d hiplayer || make -C hiplayer clean
+	$(AT)test ! -d hiplayer || make -j16 -C hiplayer clean
 
 gstreamer:
-	$(AT)test ! -d gstreamer/integration || make -C gstreamer/integration all
+	$(AT)test ! -d gstreamer/integration || make -j16 -C gstreamer/integration all
 
 gstreamer_clean:
-	$(AT)test ! -d gstreamer/integration || make -C gstreamer/integration clean
+	$(AT)test ! -d gstreamer/integration || make -j16 -C gstreamer/integration clean
 
 karaoke: alsa
-	$(AT)test -d karaoke && make -C karaoke all
+	$(AT)test -d karaoke && make -j16 -C karaoke all
 
 karaoke_clean:
-	$(AT)test -d karaoke && make -C karaoke clean
+	$(AT)test -d karaoke && make -j16 -C karaoke clean
 
 resampler:
-	$(AT)test ! -d resampler || make -C resampler all
+	$(AT)test ! -d resampler || make -j16 -C resampler all
 
 resampler_clean:
-	$(AT)test ! -d resampler || make -C resampler clean
+	$(AT)test ! -d resampler || make -j16 -C resampler clean
