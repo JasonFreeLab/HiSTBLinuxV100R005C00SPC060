@@ -1,0 +1,28 @@
+name: Build Hi3798 SDK
+
+on:
+  workflow_dispatch:   
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04   
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libncurses5-dev lib32z1 lib32stdc++6 \
+            gcc-multilib g++-multilib build-essential
+
+      - name: Build
+        run: |
+          source ./env.sh
+          make linux -j$(nproc)
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: out/          
