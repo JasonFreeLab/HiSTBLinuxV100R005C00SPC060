@@ -65,16 +65,16 @@ export SDK_DIR ADVCA_DIR ADVCA_TYPE_DIR ADVCA_COMMON_SRC_DIR ADVCA_COMMON_DIR CF
 .PHONY : all clean install uninstall
 
 all :
-	make -j16 -C $(ADVCA_TYPE_DIR) all
+	make -C $(ADVCA_TYPE_DIR) all
 
 clean:
-	make -j16 -C $(ADVCA_TYPE_DIR) clean
+	make -C $(ADVCA_TYPE_DIR) clean
 
 install:
-	make -j16 -C $(ADVCA_TYPE_DIR) install
+	make -C $(ADVCA_TYPE_DIR) install
 
 uninstall: clean
-	make -j16 -C $(ADVCA_TYPE_DIR) uninstall
+	make -C $(ADVCA_TYPE_DIR) uninstall
 
 else
 all :

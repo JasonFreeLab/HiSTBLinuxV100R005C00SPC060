@@ -51,7 +51,7 @@ endif
 
 clean:
 	$(AT)rm -rf $(HI_OUT_DIR)
-#	 $(AT)test ! -d $(KERNEL_SRC_DIR).patch || rm -rf $(KERNEL_SRC_DIR)
+	$(AT)test ! -d $(KERNEL_SRC_DIR).patch || rm -rf $(KERNEL_SRC_DIR)
 
 #====================================================================================
 #                   global targets

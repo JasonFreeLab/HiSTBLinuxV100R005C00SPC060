@@ -18,7 +18,7 @@ CFG_FS_BUILDIN  := $(CFG_HI_FS_BUILDIN)
 
 ################################################################################
 KERNEL_OUT_DIR := $(LINUX_DIR)
-# KERNEL_PATCH_DIR ?= $(KERNEL_SRC_DIR).patch
+KERNEL_PATCH_DIR ?= $(KERNEL_SRC_DIR).patch
 
 ifeq ($(KERNEL_SRC_DIR),$(KERNEL_OUT_DIR))
 BUILD_DIR :=
@@ -173,7 +173,7 @@ ifeq ($(HI_DRV_BUILDTYPE),m)
 	$(AT)(find $(KERNEL_OUT_DIR)/drivers/common -name "*.ko" | xargs cp -f -t $(HI_MODULE_DIR)/)
 	$(AT)(find $(KERNEL_OUT_DIR)/drivers/msp -name "*.ko" | xargs cp -f -t $(HI_MODULE_DIR)/)
 ifeq ($(CFG_HI_IR_TYPE_LIRC),y)
-	$(AT)make -j16 -C $(MSP_DIR)/drv/ir/lirc
+	$(AT)make -C $(MSP_DIR)/drv/ir/lirc
 endif
 endif
 ifeq ($(CFG_HI_WIFI_SUPPORT),y)
@@ -205,23 +205,23 @@ endif
 ifeq ($(DISABLE_TEE),1)
 ifeq ($(CONFIG_HI3796MV2X_FPGA),1)
 $(FIP_IMG): $(KERNEL_OUT_DIR)/arch/$(CFG_HI_CPU_ARCH)/boot/uImage
-	make -j16 -C $(FIP_SRC_DIR) CROSS_COMPILE=$(CROSS_COMPILE64) PLAT=$(CFG_HI_CHIP_TYPE) SPD=none CONFIG_HI3796MV2X_FPGA=$(CONFIG_HI3796MV2X_FPGA) BL33=$< DEBUG=1 DISABLE_TEE=$(DISABLE_TEE) fip O=$(FIP_OUT_DIR) ATF_EXT_FLAGS=$(ATF_EXTRA_FLAGS)
+	make -C $(FIP_SRC_DIR) CROSS_COMPILE=$(CROSS_COMPILE64) PLAT=$(CFG_HI_CHIP_TYPE) SPD=none CONFIG_HI3796MV2X_FPGA=$(CONFIG_HI3796MV2X_FPGA) BL33=$< DEBUG=1 DISABLE_TEE=$(DISABLE_TEE) fip O=$(FIP_OUT_DIR) ATF_EXT_FLAGS=$(ATF_EXTRA_FLAGS)
 else
 $(FIP_IMG): $(KERNEL_OUT_DIR)/arch/$(CFG_HI_CPU_ARCH)/boot/uImage
-	make -j16 -C $(FIP_SRC_DIR) CROSS_COMPILE=$(CROSS_COMPILE64) PLAT=$(CFG_HI_CHIP_TYPE) SPD=none BL33=$< DEBUG=1 DISABLE_TEE=$(DISABLE_TEE) fip O=$(FIP_OUT_DIR) ATF_EXT_FLAGS=$(ATF_EXTRA_FLAGS)
+	make -C $(FIP_SRC_DIR) CROSS_COMPILE=$(CROSS_COMPILE64) PLAT=$(CFG_HI_CHIP_TYPE) SPD=none BL33=$< DEBUG=1 DISABLE_TEE=$(DISABLE_TEE) fip O=$(FIP_OUT_DIR) ATF_EXT_FLAGS=$(ATF_EXTRA_FLAGS)
 endif
 else
 ifeq ($(CONFIG_HI3796MV2X_FPGA),1)
 $(FIP_IMG): $(KERNEL_OUT_DIR)/arch/$(CFG_HI_CPU_ARCH)/boot/uImage
-	make -j16 -C $(FIP_SRC_DIR) CROSS_COMPILE=$(CROSS_COMPILE64) PLAT=$(CFG_HI_CHIP_TYPE) CONFIG_HI3796MV2X_FPGA=$(CONFIG_HI3796MV2X_FPGA) NEED_BL32=no BL33=$< DEBUG=1 fip O=$(FIP_OUT_DIR) ATF_EXT_FLAGS=$(ATF_EXTRA_FLAGS) SPD=$(SPD_NAME)
+	make -C $(FIP_SRC_DIR) CROSS_COMPILE=$(CROSS_COMPILE64) PLAT=$(CFG_HI_CHIP_TYPE) CONFIG_HI3796MV2X_FPGA=$(CONFIG_HI3796MV2X_FPGA) NEED_BL32=no BL33=$< DEBUG=1 fip O=$(FIP_OUT_DIR) ATF_EXT_FLAGS=$(ATF_EXTRA_FLAGS) SPD=$(SPD_NAME)
 else
 $(FIP_IMG): $(KERNEL_OUT_DIR)/arch/$(CFG_HI_CPU_ARCH)/boot/uImage
-	make -j16 -C $(FIP_SRC_DIR) CROSS_COMPILE=$(CROSS_COMPILE64) PLAT=$(CFG_HI_CHIP_TYPE) NEED_BL32=no BL33=$< DEBUG=1 fip O=$(FIP_OUT_DIR) ATF_EXT_FLAGS=$(ATF_EXTRA_FLAGS) SPD=$(SPD_NAME)
+	make -C $(FIP_SRC_DIR) CROSS_COMPILE=$(CROSS_COMPILE64) PLAT=$(CFG_HI_CHIP_TYPE) NEED_BL32=no BL33=$< DEBUG=1 fip O=$(FIP_OUT_DIR) ATF_EXT_FLAGS=$(ATF_EXTRA_FLAGS) SPD=$(SPD_NAME)
 endif
 endif
 
 $(KERNEL_OUT_DIR)/arch/$(CFG_HI_CPU_ARCH)/boot/uImage: prepare
-	make -j16 -C $(KERNEL_SRC_DIR) ARCH=$(CFG_HI_CPU_ARCH) \
+	make -C $(KERNEL_SRC_DIR) ARCH=$(CFG_HI_CPU_ARCH) \
 		CROSS_COMPILE=$(CROSS_COMPILE) \
 		O=$(BUILD_DIR) \
 		CONFIG_MSP=y \
@@ -232,48 +232,47 @@ $(KERNEL_OUT_DIR)/arch/$(CFG_HI_CPU_ARCH)/boot/uImage: prepare
 		CFLAGS_KERNEL=$(CFLAGS_KERNEL) AFLAGS_KERNEL=$(AFLAGS_KERNEL) uImage modules
 
 menuconfig: prepare
-	make -j16 -C $(KERNEL_SRC_DIR) ARCH=$(CFG_HI_CPU_ARCH) \
+	make -C $(KERNEL_SRC_DIR) ARCH=$(CFG_HI_CPU_ARCH) \
 		CROSS_COMPILE=$(CROSS_COMPILE) \
 		O=$(BUILD_DIR) \
 		$(EXTRA_FLAGS_KERNEL) \
 		CFLAGS_KERNEL=$(CFLAGS_KERNEL) AFLAGS_KERNEL=$(AFLAGS_KERNEL) menuconfig
 
-# $(KERNEL_SRC_DIR)/tar:
-# 	@echo "*****************************************************************************************************************************"
-# 	@echo "*****************************************************************************************************************************"
-# ifeq ($(CFG_HI_KERNEL_VERSION), linux-3.18.y)
-# 	@echo "please download linux3.18 from https://www.kernel.org/pub/linux/kernel/v3.x/linux-3.18.24.tar.gz"
-# 	@echo "copy linux-3.18.24.tar.gz into the directory 'sdk/third_party/open_source/' "
-# else ifeq ($(CFG_HI_KERNEL_VERSION), linux-4.4.y)
-# 	@echo "please download linux4.4 from https://www.kernel.org/pub/linux/kernel/v4.x/linux-4.4.35.tar.gz"
-# 	@echo "copy linux-4.4.35.tar.gz into the directory 'sdk/third_party/open_source/' "
-# else ifeq ($(CFG_HI_KERNEL_VERSION), linux-4.9.y)
-# 	@echo "please download linux4.9 from https://www.kernel.org/pub/linux/kernel/v4.x/linux-4.9.44.tar.gz"
-# 	@echo "copy linux-4.9.44.tar.gz into the directory 'sdk/third_party/open_source/' "
-# endif
-# 	@echo "*****************************************************************************************************************************"
-# 	@echo "*****************************************************************************************************************************"
-# ifeq ($(CFG_HI_KERNEL_VERSION), linux-3.18.y)
-# 	$(AT)test -d $(KERNEL_SRC_DIR) || test ! -f $(SDK_DIR)/third_party/open_source/linux-3.18.24.tar.gz \
-# 	|| tar -xzf $(SDK_DIR)/third_party/open_source/linux-3.18.24.tar.gz -C $(SDK_DIR)/source/kernel/
-# 	$(AT)test ! -d linux-3.18.24 \
-# 	|| mv $(SDK_DIR)/source/kernel/linux-3.18.24 $(SDK_DIR)/source/kernel/linux-3.18.y
-# else ifeq ($(CFG_HI_KERNEL_VERSION), linux-4.4.y)
-# 	$(AT)test -d $(KERNEL_SRC_DIR) || test ! -f $(SDK_DIR)/third_party/open_source/linux-4.4.35.tar.gz \
-# 	|| tar -xzf $(SDK_DIR)/third_party/open_source/linux-4.4.35.tar.gz -C $(SDK_DIR)/source/kernel/
-# 	$(AT)test ! -d linux-4.4.35 \
-# 	|| mv $(SDK_DIR)/source/kernel/linux-4.4.35 $(SDK_DIR)/source/kernel/linux-4.4.y
-# else
-# 	$(AT)test -d $(KERNEL_SRC_DIR) || test ! -f $(SDK_DIR)/third_party/open_source/linux-4.9.44.tar.gz \
-# 	|| tar -xzf $(SDK_DIR)/third_party/open_source/linux-4.9.44.tar.gz -C $(SDK_DIR)/source/kernel/
-# 	$(AT)test ! -d linux-4.9.44 \
-# 	|| mv $(SDK_DIR)/source/kernel/linux-4.9.44 $(SDK_DIR)/source/kernel/linux-4.9.y
-# endif
+$(KERNEL_SRC_DIR)/tar:
+	@echo "*****************************************************************************************************************************"
+	@echo "*****************************************************************************************************************************"
+ifeq ($(CFG_HI_KERNEL_VERSION), linux-3.18.y)
+	@echo "please download linux3.18 from https://www.kernel.org/pub/linux/kernel/v3.x/linux-3.18.24.tar.gz"
+	@echo "copy linux-3.18.24.tar.gz into the directory 'sdk/third_party/open_source/' "
+else ifeq ($(CFG_HI_KERNEL_VERSION), linux-4.4.y)
+	@echo "please download linux4.4 from https://www.kernel.org/pub/linux/kernel/v4.x/linux-4.4.35.tar.gz"
+	@echo "copy linux-4.4.35.tar.gz into the directory 'sdk/third_party/open_source/' "
+else ifeq ($(CFG_HI_KERNEL_VERSION), linux-4.9.y)
+	@echo "please download linux4.9 from https://www.kernel.org/pub/linux/kernel/v4.x/linux-4.9.44.tar.gz"
+	@echo "copy linux-4.9.44.tar.gz into the directory 'sdk/third_party/open_source/' "
+endif
+	@echo "*****************************************************************************************************************************"
+	@echo "*****************************************************************************************************************************"
+ifeq ($(CFG_HI_KERNEL_VERSION), linux-3.18.y)
+	$(AT)test -d $(KERNEL_SRC_DIR) || test ! -f $(SDK_DIR)/third_party/open_source/linux-3.18.24.tar.gz \
+	|| tar -xzf $(SDK_DIR)/third_party/open_source/linux-3.18.24.tar.gz -C $(SDK_DIR)/source/kernel/
+	$(AT)test ! -d linux-3.18.24 \
+	|| mv $(SDK_DIR)/source/kernel/linux-3.18.24 $(SDK_DIR)/source/kernel/linux-3.18.y
+else ifeq ($(CFG_HI_KERNEL_VERSION), linux-4.4.y)
+	$(AT)test -d $(KERNEL_SRC_DIR) || test ! -f $(SDK_DIR)/third_party/open_source/linux-4.4.35.tar.gz \
+	|| tar -xzf $(SDK_DIR)/third_party/open_source/linux-4.4.35.tar.gz -C $(SDK_DIR)/source/kernel/
+	$(AT)test ! -d linux-4.4.35 \
+	|| mv $(SDK_DIR)/source/kernel/linux-4.4.35 $(SDK_DIR)/source/kernel/linux-4.4.y
+else
+	$(AT)test -d $(KERNEL_SRC_DIR) || test ! -f $(SDK_DIR)/third_party/open_source/linux-4.9.44.tar.gz \
+	|| tar -xzf $(SDK_DIR)/third_party/open_source/linux-4.9.44.tar.gz -C $(SDK_DIR)/source/kernel/
+	$(AT)test ! -d linux-4.9.44 \
+	|| mv $(SDK_DIR)/source/kernel/linux-4.9.44 $(SDK_DIR)/source/kernel/linux-4.9.y
+endif
 
-# prepare: $(KERNEL_SRC_DIR)/tar
-# 	$(AT)test ! -d $(KERNEL_PATCH_DIR) || cp -rf $(KERNEL_PATCH_DIR)/* $(KERNEL_SRC_DIR)/
-# 	$(AT)test ! -f $(KERNEL_SRC_DIR)/.config || rm -f $(KERNEL_SRC_DIR)/.config
-prepare:
+prepare: $(KERNEL_SRC_DIR)/tar
+	$(AT)test ! -d $(KERNEL_PATCH_DIR) || cp -rf $(KERNEL_PATCH_DIR)/* $(KERNEL_SRC_DIR)/
+	$(AT)test ! -f $(KERNEL_SRC_DIR)/.config || rm -f $(KERNEL_SRC_DIR)/.config
 ifeq ($(CFG_HI_NAND_FLASH_SUPPORT),y)
 	$(AT)test -d $(HI_NAND_IMAGE_DIR) || mkdir -p $(HI_NAND_IMAGE_DIR)
 endif
@@ -290,14 +289,14 @@ endif
 	$(AT)(cd $(KERNEL_SRC_DIR)/drivers && rm -rf msp && ln -s $(MSP_DIR)/drv msp)
 	$(AT)(cd $(KERNEL_SRC_DIR)/drivers && rm -rf wifi && ln -s $(COMPONENT_DIR)/wifi/drv wifi)
 	$(AT)(cd $(KERNEL_SRC_DIR)/drivers && rm -rf bluetooth_usb && ln -s $(COMPONENT_DIR)/bluetooth/drv bluetooth_usb)
-	$(AT)make -j16 -C $(KERNEL_SRC_DIR) ARCH=$(CFG_HI_CPU_ARCH) \
+	$(AT)make -C $(KERNEL_SRC_DIR) ARCH=$(CFG_HI_CPU_ARCH) \
 		CROSS_COMPILE=$(CROSS_COMPILE) \
 		O=$(BUILD_DIR) \
 		$(EXTRA_FLAGS_KERNEL) \
 		CFLAGS_KERNEL=$(CFLAGS_KERNEL) AFLAGS_KERNEL=$(AFLAGS_KERNEL) $(KERNEL_CONFIG)
-	$(if $(CFG_HI_TEE_SUPPORT),make -j16 tee_config,)
-	make -j16 pcie_config
-	$(AT)make -j16 -C $(KERNEL_SRC_DIR) ARCH=$(CFG_HI_CPU_ARCH) \
+	$(if $(CFG_HI_TEE_SUPPORT),make tee_config,)
+	make pcie_config
+	$(AT)make -C $(KERNEL_SRC_DIR) ARCH=$(CFG_HI_CPU_ARCH) \
 		CROSS_COMPILE=$(CROSS_COMPILE) \
 		O=$(BUILD_DIR) \
 		$(EXTRA_FLAGS_KERNEL) \
@@ -316,7 +315,7 @@ endif
 endif
 
 fs_buildin: prepare $(INITRAMFS_SOURCE)
-	make -j16 -C $(KERNEL_SRC_DIR) ARCH=$(CFG_HI_CPU_ARCH) \
+	make -C $(KERNEL_SRC_DIR) ARCH=$(CFG_HI_CPU_ARCH) \
 		CROSS_COMPILE=$(CROSS_COMPILE) \
 		O=$(BUILD_DIR) \
 		CONFIG_MSP=y \
@@ -330,7 +329,7 @@ fs_buildin: prepare $(INITRAMFS_SOURCE)
 		CONFIG_INITRAMFS_SOURCE=$(INITRAMFS_SOURCE) \
 		uImage
 ifeq ($(CFG_HI_CPU_ARCH),arm64)
-	make -j16 -C $(FIP_SRC_DIR) CROSS_COMPILE=$(CROSS_COMPILE) PLAT=$(CFG_HI_CHIP_TYPE) $(if $(DISABLE_TEE), SPD=none,) BL33=$(KERNEL_OUT_DIR)/arch/$(CFG_HI_CPU_ARCH)/boot/uImage DEBUG=1 DISABLE_TEE=$(DISABLE_TEE) CONFIG_HI3796MV2X_FPGA=$(CONFIG_HI3796MV2X_FPGA) fip O=$(FIP_OUT_DIR)
+	make -C $(FIP_SRC_DIR) CROSS_COMPILE=$(CROSS_COMPILE) PLAT=$(CFG_HI_CHIP_TYPE) $(if $(DISABLE_TEE), SPD=none,) BL33=$(KERNEL_OUT_DIR)/arch/$(CFG_HI_CPU_ARCH)/boot/uImage DEBUG=1 DISABLE_TEE=$(DISABLE_TEE) CONFIG_HI3796MV2X_FPGA=$(CONFIG_HI3796MV2X_FPGA) fip O=$(FIP_OUT_DIR)
 endif
 ifeq ($(CFG_HI_LOADER_APPLOADER),y)
 ifeq ($(CFG_HI_NAND_FLASH_SUPPORT),y)
@@ -363,25 +362,25 @@ endif
 ################################################################################
 
 distclean: clean
-	$(AT)make -j16 -C $(KERNEL_SRC_DIR) ARCH=$(CFG_HI_CPU_ARCH) \
+	$(AT)make -C $(KERNEL_SRC_DIR) ARCH=$(CFG_HI_CPU_ARCH) \
 		CROSS_COMPILE=$(CROSS_COMPILE) \
 		O=$(BUILD_DIR) \
 		$(EXTRA_FLAGS_KERNEL) \
 		CFLAGS_KERNEL=$(CFLAGS_KERNEL) \
 		AFLAGS_KERNEL=$(AFLAGS_KERNEL) distclean
 ifeq ($(CFG_HI_CPU_ARCH),arm64)
-	$(AT)make -j16 -C $(FIP_SRC_DIR) CROSS_COMPILE=$(CROSS_COMPILE) PLAT=$(CFG_HI_CHIP_TYPE) $(if $(DISABLE_TEE), SPD=none,) BL33=$(KERNEL_OUT_DIR)/arch/$(CFG_HI_CPU_ARCH)/boot/uImage DEBUG=1 DISABLE_TEE=$(DISABLE_TEE) O=$(FIP_OUT_DIR) distclean
+	$(AT)make -C $(FIP_SRC_DIR) CROSS_COMPILE=$(CROSS_COMPILE) PLAT=$(CFG_HI_CHIP_TYPE) $(if $(DISABLE_TEE), SPD=none,) BL33=$(KERNEL_OUT_DIR)/arch/$(CFG_HI_CPU_ARCH)/boot/uImage DEBUG=1 DISABLE_TEE=$(DISABLE_TEE) O=$(FIP_OUT_DIR) distclean
 endif
 
 clean:
-	$(AT)make -j16 -C $(KERNEL_SRC_DIR) ARCH=$(CFG_HI_CPU_ARCH) \
+	$(AT)make -C $(KERNEL_SRC_DIR) ARCH=$(CFG_HI_CPU_ARCH) \
 		CROSS_COMPILE=$(CROSS_COMPILE) \
 		O=$(BUILD_DIR) \
 		$(EXTRA_FLAGS_KERNEL) \
 		CFLAGS_KERNEL=$(CFLAGS_KERNEL) \
 		AFLAGS_KERNEL=$(AFLAGS_KERNEL) clean
 ifeq ($(CFG_HI_CPU_ARCH),arm64)
-	$(AT)make -j16 -C $(FIP_SRC_DIR) CROSS_COMPILE=$(CROSS_COMPILE) PLAT=$(CFG_HI_CHIP_TYPE) $(if $(DISABLE_TEE), SPD=none,) BL33=$(KERNEL_OUT_DIR)/arch/$(CFG_HI_CPU_ARCH)/boot/uImage DEBUG=1 DISABLE_TEE=$(DISABLE_TEE) O=$(FIP_OUT_DIR) distclean
+	$(AT)make -C $(FIP_SRC_DIR) CROSS_COMPILE=$(CROSS_COMPILE) PLAT=$(CFG_HI_CHIP_TYPE) $(if $(DISABLE_TEE), SPD=none,) BL33=$(KERNEL_OUT_DIR)/arch/$(CFG_HI_CPU_ARCH)/boot/uImage DEBUG=1 DISABLE_TEE=$(DISABLE_TEE) O=$(FIP_OUT_DIR) distclean
 endif
 ifdef CFG_HI_ADVCA_FUNCTION
 ifeq ($(CFG_HI_LOADER_APPLOADER),y)
@@ -401,7 +400,7 @@ ifeq ($(CFG_HI_SPI_SUPPORT),y)
 	$(AT)rm -rf $(HI_SPI_IMAGE_DIR)/hi_kernel.bin $(HI_SPI_IMAGE_DIR)/apploader.bin
 endif
 ifeq ($(CFG_HI_IR_TYPE_LIRC),y)
-	$(AT)make -j16 -C $(MSP_DIR)/drv/ir/lirc clean
+	$(AT)make -C $(MSP_DIR)/drv/ir/lirc clean
 endif
 	$(AT)rm -rf $(HI_MODULE_DIR)
 

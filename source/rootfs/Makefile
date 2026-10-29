@@ -4,10 +4,10 @@
 #
 ################################################################################
 # Compiler:
-#     make -j16 CROSS_COMPILE=arm-hisiv200-linux- PREFIX=~/tftp/
+#     make CROSS_COMPILE=arm-hisiv200-linux- PREFIX=~/tftp/
 #
 # Command format:
-#    make -j16 <option>
+#    make <option>
 #    Options:
 #        CROSS_COMPILE=<cross compile>   - cross compile tools
 #        PREFIX=<dir>                    - image path
@@ -17,12 +17,12 @@
 #        <dir>.menuconfig                - menuconfig dir
 #
 # Examples:
-#        make -j16 CROSS_COMPILE=arm-histbv320-linux- PREFIX=~/tftp/
+#        make CROSS_COMPILE=arm-histbv320-linux- PREFIX=~/tftp/
 #
 #    menuconfig "busybox" complie "busybox"
-#        make -j16 busybox/.menuconfig
-#        make -j16 busybox/.build
-#        make -j16 busybox/.clean
+#        make busybox/.menuconfig
+#        make busybox/.build
+#        make busybox/.clean
 #
 ######################export val################################################
 #  CFG_HI_EXPORT_FLAG
@@ -155,10 +155,10 @@ check:
 ################################################################################
 %.build: check
 	@echo -e $(PURPLE)Build $(patsubst %.build,%,$@) ...$(NORMAL)
-	make -j16 -C $(patsubst %.build,%,$@) $(MKFLAGS)
+	make -C $(patsubst %.build,%,$@) $(MKFLAGS)
 
 %.clean:
-	make -j16 -C $(patsubst %.clean,%,$@) $(MKFLAGS) clean
+	make -C $(patsubst %.clean,%,$@) $(MKFLAGS) clean
 
 PHONYS += clean
 clean: $(patsubst %,%.clean,$(TOOLS-y))

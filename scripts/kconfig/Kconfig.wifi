@@ -51,7 +51,7 @@ config  HI_WIFI_DEVICE_RTL8822BS
     depends on HI_32BIT_SYSTEM && (HI3798CV200 || HI3798MV200 || HI3798MV300 || HI3798MV300H || HI3798MV310 || HI3796MV200 || HI3716MV450)
 
 config  HI_WIFI_DEVICE_RTL8822CS
-    bool "Realtek RTL8822CS (11ac 2x2 5G SDIO)"
+    bool "Realtek RTL8822CS (11ac 2x2 2.4G+5G SDIO + BT5.3)"
     depends on HI_32BIT_SYSTEM && (HI3798CV200 || HI3798MV200 || HI3798MV300 || HI3798MV300H || HI3798MV310 || HI3796MV200 || HI3716MV450)
 
 config  HI_WIFI_DEVICE_RTL8821AU
@@ -88,30 +88,5 @@ config  HI_WIFI_MODE_AP
     bool "SoftAP Mode"
     help
         work as Access Point(AP)
-
-endmenu
-
-menu    "WiFi tools"
-    depends on HI_WIFI_SUPPORT
-
-config  HI_WIFI_TOOL_WIRELESS_TOOLS
-    bool "wireless-tools"
-    help
-        wireless-tools
-
-config  HI_WIFI_TOOL_IW
-    bool "iw"
-    help
-        iw
-
-config  HI_WIFI_TOOL_AIRCRACK_NG
-    bool "aircrack-ng"
-    help
-        aircrack-ng
-
-config  HI_WIFI_TOOL_TCPDUMP
-    bool "tcpdump"
-    help
-        tcpdump
 
 endmenu

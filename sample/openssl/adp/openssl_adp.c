@@ -693,30 +693,6 @@ static const SSL_METHOD *getSslMethod(Hi_SSL_VERSION_TYPE_E eSSLVersion, HI_BOOL
 {
     const SSL_METHOD *meth;
     
-    // switch (eSSLVersion)
-    // {
-    //     case SSL_VERSION_SSL_V2:
-    //     case SSL_VERSION_SSL_V3:
-    //         sample_printf("%s: Use SSL_VERSION_SSL_V2 or SSL_VERSION_SSL_V3 \n", __FUNCTION__);
-    //         meth = (isServer == HI_TRUE) ? SSLv23_server_method() : SSLv23_client_method();
-    //         break;
-    //     case SSL_VERSION_TLS_V1:
-    //         sample_printf("%s: Use SSL_VERSION_TLS_V1 \n", __FUNCTION__);
-    //         meth = (isServer == HI_TRUE) ? TLSv1_server_method() : TLSv1_client_method();
-    //         break;
-    //     case SSL_VERSION_TLS_V1_1:
-    //         sample_printf("%s: Use SSL_VERSION_TLS_V1_1 \n", __FUNCTION__);
-    //         meth = (isServer == HI_TRUE) ? TLSv1_1_server_method() : TLSv1_1_client_method();
-    //         break;
-    //     case SSL_VERSION_TLS_V1_2:
-    //         sample_printf("%s: Use SSL_VERSION_TLS_V1_2 \n", __FUNCTION__);
-    //         meth = (isServer == HI_TRUE) ? TLSv1_2_server_method() : TLSv1_2_client_method();
-    //         break;    
-    //     default:
-    //         meth = HI_NULL;
-    //         sample_printf("%s: Unknown SSL Version type \n", __FUNCTION__);
-    //        break;
-    // }
     switch (eSSLVersion)
     {
         case SSL_VERSION_SSL_V2:

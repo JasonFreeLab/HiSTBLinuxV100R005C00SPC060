@@ -67,12 +67,6 @@ ifeq ($(CFG_HI_CAPTION_CC_SUPPORT),y)
 objects += cc
 endif
 
-ifeq ($(CFG_HI_WFB_NG_SUPPORT),y)
-objects += libsodium
-objects += libevent
-objects += wfb-ng
-endif
-
 ifeq ($(CFG_HI_WIFI_SUPPORT),y)
 objects += wifi
 endif
@@ -112,19 +106,6 @@ else ifeq ($(CFG_HI_PLAYER_SUPPORT),y)
     objects += drm
 endif
 
-ifeq ($(CFG_HI_FFMPEF_SUPPORT),y)
-objects += x264
-objects += ffmpeg
-endif
-
-ifeq ($(CFG_HI_PCRE_SUPPORT),y)
-objects += pcre
-endif
-
-ifeq ($(CFG_HI_PCRE2_SUPPORT),y)
-objects += pcre2
-endif
-
 objects_clean := $(addsuffix _clean,$(objects))
 
 depends += $(objects)
@@ -162,14 +143,7 @@ depends_clean := $(addsuffix _clean,$(depends))
 
 all: $(depends)
 ifeq ($(CFG_HI_WIFI_SUPPORT),y)
-wifi: openssl pcre
-endif
-ifeq ($(CFG_HI_FFMPEF_SUPPORT),y)
-ffmpeg: x264
-endif
-ifeq ($(CFG_HI_WFB_NG_SUPPORT),y)
-libevent: openssl
-wfb-ng: wifi libsodium libevent
+wifi: openssl
 endif
 clean: $(depends_clean)
 
@@ -179,37 +153,37 @@ clean: $(depends_clean)
 .PHONY: $(depends) $(objects_clean)
 
 $(objects):
-	$(AT)make -j16 -C $@ all
+	$(AT)make -C $@ all
 
 $(objects_clean):
-	$(AT)make -j16 -C $(patsubst %_clean,%,$@) clean
+	$(AT)make -C $(patsubst %_clean,%,$@) clean
 
 loader: freetype harfbuzz $(if $(findstring $(CFG_HI_CURL_SUPPORT),y),curl,)
-	$(AT)make -j16 -C loader all
+	$(AT)make -C loader all
 
 loader_clean:
-	$(AT)make -j16 -C loader clean
+	$(AT)make -C loader clean
 
 hiplayer:
-	$(AT)test ! -d hiplayer || make -j16 -C hiplayer all
+	$(AT)test ! -d hiplayer || make -C hiplayer all
 
 hiplayer_clean:
-	$(AT)test ! -d hiplayer || make -j16 -C hiplayer clean
+	$(AT)test ! -d hiplayer || make -C hiplayer clean
 
 gstreamer:
-	$(AT)test ! -d gstreamer/integration || make -j16 -C gstreamer/integration all
+	$(AT)test ! -d gstreamer/integration || make -C gstreamer/integration all
 
 gstreamer_clean:
-	$(AT)test ! -d gstreamer/integration || make -j16 -C gstreamer/integration clean
+	$(AT)test ! -d gstreamer/integration || make -C gstreamer/integration clean
 
 karaoke: alsa
-	$(AT)test -d karaoke && make -j16 -C karaoke all
+	$(AT)test -d karaoke && make -C karaoke all
 
 karaoke_clean:
-	$(AT)test -d karaoke && make -j16 -C karaoke clean
+	$(AT)test -d karaoke && make -C karaoke clean
 
 resampler:
-	$(AT)test ! -d resampler || make -j16 -C resampler all
+	$(AT)test ! -d resampler || make -C resampler all
 
 resampler_clean:
-	$(AT)test ! -d resampler || make -j16 -C resampler clean
+	$(AT)test ! -d resampler || make -C resampler clean
