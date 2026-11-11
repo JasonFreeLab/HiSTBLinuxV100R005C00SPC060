@@ -52,7 +52,7 @@ static int32_t (*bl32_init)(void);
  * (non-secure & default) or BL32 (secure).
  ******************************************************************************/
 #if DISABLE_TEE==1
-static uint32_t next_image_type = SECURE;
+static uint32_t next_image_type = NON_SECURE;
 #else
 static uint32_t next_image_type = NON_SECURE;
 #endif

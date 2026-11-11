@@ -128,14 +128,9 @@ void bl31_early_platform_setup(bl31_params_t *from_bl2,
 	bl33_image_ep_info = *from_bl2->bl33_ep_info;
 	bl32_image_ep_info = *from_bl2->bl32_ep_info;
 
-#if DISABLE_TEE == 1
-	SET_SECURITY_STATE(bl33_image_ep_info.h.attr,
-			SECURE);
-#else
+	/* 无 TEE 时 BL33 走 normal world（否则字串会进 secure EL1 卡死） */
 	SET_SECURITY_STATE(bl33_image_ep_info.h.attr,
 			NON_SECURE);
-
-#endif
 
 #else
 
@@ -168,16 +163,16 @@ void bl31_early_platform_setup(bl31_params_t *from_bl2,
 void bl31_platform_setup(void){
 	plat_delay_timer_init();
 
-#if 1
-        __asm volatile("mrs     x0, cnthctl_el2\n"
-                        "orr     x0, x0, #0x3\n"
-                        "msr     cnthctl_el2, x0\n"
-                        "msr    cntvoff_el2, xzr\n"
-                        "msr     cntvoff_el2, x0\n"
-                        "orr     x0, x0, #0x3\n"
-                        "msr     cntkctl_el1, x0\n");
+	/* 正常世界 Linux 需要 GIC 已初始化，否则 timer PPI 无法送达 CPU */
+	plat_hisi_gic_init();
+	arm_gic_setup();
 
-#endif
+	/* 允许 EL1 访问物理计数器，清空虚拟偏移 */
+	__asm volatile("mrs     x0, cnthctl_el2\n"
+			"orr     x0, x0, #0x3\n"
+			"msr     cnthctl_el2, x0\n"
+			"msr     cntvoff_el2, xzr\n"
+			"msr     cntkctl_el1, xzr\n" ::: "x0");
 }
 #else
 void bl31_platform_setup(void)

@@ -188,11 +188,13 @@ void hisi_pwr_domain_on_finish(const psci_power_state_t *target_state)
 	arm_gic_cpuif_setup();
 	arm_gic_pcpu_distif_setup();
 #else
+	/* secondary core: GIC CPU interface + redistributor must be set up too */
+	arm_gic_cpuif_setup();
+	arm_gic_pcpu_distif_setup();
 	__asm volatile("mrs     x0, cnthctl_el2\n"
 			"orr     x0, x0, #0x3\n"
 			"msr     cnthctl_el2, x0\n"
 			"msr	cntvoff_el2, xzr\n"
-			"msr     cntvoff_el2, x0\n"
 			"orr     x0, x0, #0x3\n"
 			"msr     cntkctl_el1, x0\n");
 #endif

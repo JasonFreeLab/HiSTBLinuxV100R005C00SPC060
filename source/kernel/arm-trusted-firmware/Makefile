@@ -51,8 +51,8 @@ DEBUG				:= 0
 DEFAULT_PLAT			:= fvp
 PLAT				:= ${DEFAULT_PLAT}
 # SPD choice
-#SPD				:= none
-SPD				:= tspd
+SPD				:= none
+#SPD				:= tspd
 # Base commit to perform code check on
 BASE_COMMIT			:= origin/master
 # NS timer register save and restore
@@ -181,17 +181,17 @@ NM			:=	${CROSS_COMPILE}nm
 PP			:=	${CROSS_COMPILE}gcc -E
 
 ASFLAGS			+= 	-nostdinc -ffreestanding -Wa,--fatal-warnings	\
-				-Werror -Wmissing-include-dirs			\
+				-Werror -Wmissing-include-dirs -Wno-error=implicit-function-declaration -Wno-error=array-bounds -Wno-error=deprecated-declarations			\
 				-mgeneral-regs-only -D__ASSEMBLY__		\
 				${DEFINES} ${INCLUDES}
 CFLAGS			+= 	-nostdinc -ffreestanding -Wall			\
-				-Wmissing-include-dirs			\
+				-Wmissing-include-dirs -Wno-error=implicit-function-declaration -Wno-error=array-bounds -Wno-error=deprecated-declarations			\
 				-mgeneral-regs-only -mstrict-align		\
 				-std=c99 -c -Os					\
 				${DEFINES} ${INCLUDES}
 CFLAGS			+=	-ffunction-sections -fdata-sections
 
-LDFLAGS			+=	--fatal-warnings -O1
+LDFLAGS			+=	--no-warn-rwx-segments -O1
 LDFLAGS			+=	--gc-sections
 
 

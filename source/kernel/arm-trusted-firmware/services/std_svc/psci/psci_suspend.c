@@ -260,9 +260,5 @@ void psci_cpu_suspend_finish(unsigned int cpu_idx,
 	 * information that we had stashed away during the suspend
 	 * call to set this cpu on its way.
 	 */
-#if DISABLE_TEE == 1 
-	cm_prepare_el3_exit(SECURE);
-#else
 	cm_prepare_el3_exit(NON_SECURE);
-#endif
 }

@@ -90,11 +90,8 @@ static void psci_init_pwr_domain_node(unsigned int node_idx,
 
 		cm_set_context_by_index(node_idx,
 					(void *) &psci_ns_context[node_idx],
-#if DISABLE_TEE == 1
-					SECURE);
-#else
+					/* NS context 挂 NON_SECURE，配合 normal-world 退出 */
 					NON_SECURE);
-#endif
 	}
 }
 

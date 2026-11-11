@@ -603,11 +603,8 @@ static int psci_get_ns_ep_info(entry_point_info_t *ep,
 	sctlr = ns_scr_el3 & SCR_HCE_BIT ? read_sctlr_el2() : ns_sctlr_el1;
 	ee = 0;
 
-#if DISABLE_TEE == 1
-	ep_attr = SECURE | EP_ST_DISABLE;
-#else
+	/* normal-world Linux：secondary CPU 也必须以 NON_SECURE 进入 */
 	ep_attr = NON_SECURE | EP_ST_DISABLE;
-#endif
 	if (sctlr & SCTLR_EE_BIT) {
 		ep_attr |= EP_EE_BIG;
 		ee = 1;
