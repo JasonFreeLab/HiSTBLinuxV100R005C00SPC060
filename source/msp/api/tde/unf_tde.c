@@ -935,3 +935,125 @@ HI_S32 HI_TDE2_MultiBlending(TDE_HANDLE s32Handle, TDE_SURFACE_LIST_S *pstSurfac
     return HI_SUCCESS;
 }
 #endif
+
+/* v16r: HI_TDE2_Rotate implementation.
+ * - 180 deg: done in HW by a Bitblit with enMirror=BOTH (TDE v2 can mirror in
+ *   both axes; 180 rotation == mirror both).
+ * - 90/270 deg: the v2_0 hardware has no transpose stage, so these are done by
+ *   a CPU fallback using the MMZ mapping helpers (weak symbols).  Only 4-byte
+ *   pixel formats (ARGB/RGBA/BGRA/ABGR 8888) are supported by the fallback;
+ *   other formats return HI_ERR_TDE_UNSUPPORTED_OPERATION.
+ */
+extern void *HI_MPI_MMZ_Map(unsigned int phys, int cached) __attribute__((weak));
+extern int   HI_MPI_MMZ_Unmap(unsigned int phys) __attribute__((weak));
+
+/* Small persistent phys->va cache for the Rotate CPU fallback.  We must not
+ * unmap these: the caller usually owns its own mapping of the same MMZ buffer,
+ * and HI_MPI_MMZ_Unmap() would invalidate it. 8 entries cover normal use. */
+#define TDE_API_MAP_CACHE 8
+static struct { unsigned int phys; void *va; } g_tde_api_maps[TDE_API_MAP_CACHE];
+
+static void *TdeApiMapPhys(unsigned int phys)
+{
+    int i;
+    for (i = 0; i < TDE_API_MAP_CACHE; i++) {
+        if (g_tde_api_maps[i].phys == phys)
+            return g_tde_api_maps[i].va;
+    }
+    for (i = 0; i < TDE_API_MAP_CACHE; i++) {
+        if (!g_tde_api_maps[i].va) {
+            void *va = HI_MPI_MMZ_Map(phys, 1);
+            if (!va)
+                return NULL;
+            g_tde_api_maps[i].phys = phys;
+            g_tde_api_maps[i].va = va;
+            return va;
+        }
+    }
+    return NULL;
+}
+
+
+HI_S32 HI_TDE2_Rotate(TDE_HANDLE s32Handle,
+                      TDE2_SURFACE_S *pstSrc, TDE2_RECT_S *pstSrcRect,
+                      TDE2_SURFACE_S *pstDst, HI_S32 s32DstPointX, HI_S32 s32DstPointY,
+                      TDE_ROTATE_ANGLE_E enRotateAngle)
+{
+    TDE2_RECT_S stDstRect = {0};
+    HI_U32 u32W, u32H;
+    HI_U32 u32RotW, u32RotH;
+
+    TDE_CHECK_FD();
+    if ((NULL == pstSrc) || (NULL == pstSrcRect) || (NULL == pstDst))
+        return HI_ERR_TDE_NULL_PTR;
+    if (enRotateAngle >= TDE_ROTATE_BUTT)
+        return HI_ERR_TDE_INVALID_PARA;
+
+    u32W = pstSrcRect->u32Width;
+    u32H = pstSrcRect->u32Height;
+    if (TDE_ROTATE_CLOCKWISE_180 == enRotateAngle) {
+        TDE2_OPT_S stOpt;
+        memset(&stOpt, 0, sizeof(stOpt));
+        stOpt.enAluCmd = TDE2_ALUCMD_NONE;
+        stOpt.enMirror = TDE2_MIRROR_BOTH;
+        stDstRect.s32Xpos = s32DstPointX;
+        stDstRect.s32Ypos = s32DstPointY;
+        stDstRect.u32Width = u32W;
+        stDstRect.u32Height = u32H;
+        return HI_TDE2_Bitblit(s32Handle, NULL, NULL, pstSrc, pstSrcRect,
+                               pstDst, &stDstRect, &stOpt);
+    }
+
+    /* 90 / 270: CPU fallback (no HW transpose on v2_0) */
+    if ((NULL == HI_MPI_MMZ_Map) || (NULL == HI_MPI_MMZ_Unmap))
+        return HI_ERR_TDE_UNSUPPORTED_OPERATION;
+
+    u32RotW = (TDE_ROTATE_CLOCKWISE_90 == enRotateAngle) ? u32H : u32H;
+    u32RotH = (TDE_ROTATE_CLOCKWISE_90 == enRotateAngle) ? u32W : u32W;
+    if (((HI_S32)(s32DstPointX + (HI_S32)u32RotW) > (HI_S32)pstDst->u32Width) ||
+        ((HI_S32)(s32DstPointY + (HI_S32)u32RotH) > (HI_S32)pstDst->u32Height))
+        return HI_ERR_TDE_INVALID_PARA;
+
+    {
+        HI_U8 *pu8Src, *pu8Dst;
+        HI_U32 u32SrcBpp = 4, u32DstBpp = 4;
+        HI_U32 u32SrcStride, u32DstStride;
+        HI_U32 u32X, u32Y;
+
+        if ((pstSrc->enColorFmt != TDE2_COLOR_FMT_ARGB8888) ||
+            (pstDst->enColorFmt != TDE2_COLOR_FMT_ARGB8888))
+            return HI_ERR_TDE_UNSUPPORTED_OPERATION;
+
+        pu8Src = TdeApiMapPhys(pstSrc->u32PhyAddr);
+        pu8Dst = TdeApiMapPhys(pstDst->u32PhyAddr);
+        if ((NULL == pu8Src) || (NULL == pu8Dst))
+            return HI_ERR_TDE_NO_MEM;
+        u32SrcStride = pstSrc->u32Stride;
+        u32DstStride = pstDst->u32Stride;
+        (void)u32SrcBpp;
+        (void)u32DstBpp;
+
+        for (u32Y = 0; u32Y < u32H; u32Y++) {
+            for (u32X = 0; u32X < u32W; u32X++) {
+                HI_U32 u32SrcOffset = (pstSrcRect->s32Ypos + (HI_S32)u32Y) * u32SrcStride +
+                                      (HI_S32)u32X * 4 + pstSrcRect->s32Xpos * 4;
+                HI_U32 u32Value = *(HI_U32 *)(pu8Src + u32SrcOffset);
+                HI_U32 u32DstX, u32DstY;
+                HI_U32 u32DstOffset;
+
+                if (TDE_ROTATE_CLOCKWISE_90 == enRotateAngle) {
+                    u32DstX = (HI_U32)(s32DstPointX) + (u32H - 1 - u32Y);
+                    u32DstY = (HI_U32)(s32DstPointY) + u32X;
+                } else {
+                    u32DstX = (HI_U32)(s32DstPointX) + u32Y;
+                    u32DstY = (HI_U32)(s32DstPointY) + (u32W - 1 - u32X);
+                }
+                u32DstOffset = u32DstY * u32DstStride + u32DstX * 4;
+                *(HI_U32 *)(pu8Dst + u32DstOffset) = u32Value;
+            }
+        }
+        /* mappings are cached in TdeApiMapPhys(); never unmapped here so the
+         * caller's own mapping of the same buffer stays valid. */
+    }
+    return HI_SUCCESS;
+}

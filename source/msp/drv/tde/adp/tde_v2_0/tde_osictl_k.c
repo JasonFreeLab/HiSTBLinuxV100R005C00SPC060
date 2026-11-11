@@ -4745,6 +4745,15 @@ EXPORT_SYMBOL(TdeOsiCancelJob);
 *****************************************************************************/
 HI_S32 TdeOsiWaitForDone(TDE_HANDLE s32Handle, HI_U32 u32TimeOut)
 {
+    {
+        extern volatile int tde_poll_active;
+        extern int tde_port_clock_force_on(void);
+        extern int tde_dbg;
+        (void)tde_port_clock_force_on();
+        tde_poll_active = 1;
+        if (tde_dbg)
+            pr_err("TDEDBG: WaitForDone active=1 (kernel wait)\r\n");
+    }
     HI_S32 Ret = HI_SUCCESS;
     HI_GFX_LOG_FuncEnter(gs_TdeDebugInterApi);
     if (in_interrupt())
@@ -4768,6 +4777,15 @@ EXPORT_SYMBOL(TdeOsiWaitForDone);
 *****************************************************************************/
 HI_S32 TdeOsiWaitAllDone(HI_BOOL bSync)
 {
+    {
+        extern volatile int tde_poll_active;
+        extern int tde_port_clock_force_on(void);
+        extern int tde_dbg;
+        (void)tde_port_clock_force_on();
+        tde_poll_active = 1;
+        if (tde_dbg)
+            pr_err("TDEDBG: WaitAllDone active=1 (kernel wait)\r\n");
+    }
     HI_S32 Ret = HI_SUCCESS;
     HI_GFX_LOG_FuncEnter(gs_TdeDebugInterApi);
     if (in_interrupt())
@@ -4793,11 +4811,159 @@ EXPORT_SYMBOL(TdeOsiWaitAllDone);
 * Return:        none
 * Others:        none
 *****************************************************************************/
+/* v16r: auto-tiling for rects larger than the v2_0 register limit
+ * (TDE_MAX_RECT_WIDTH/HEIGHT).  The API entry points split the request into
+ * multiple same-size commands inside the caller's job handle, so the old
+ * ~4096x4095 single-rect limit no longer caps the usable area.  Splitting
+ * requires source and destination rects to have identical dimensions. */
+STATIC HI_S32 TdeOsiQuickCopyTiled(TDE_HANDLE s32Handle, TDE2_SURFACE_S *pstSrc,
+                                   TDE2_RECT_S *pstSrcRect, TDE2_SURFACE_S *pstDst,
+                                   TDE2_RECT_S *pstDstRect);
+STATIC HI_S32 TdeOsiSolidDrawTiled(TDE_HANDLE s32Handle, TDE2_SURFACE_S *pstSrc,
+                                   TDE2_RECT_S *pstSrcRect, TDE2_SURFACE_S *pstDst,
+                                   TDE2_RECT_S *pstDstRect, TDE2_FILLCOLOR_S *pstFillColor,
+                                   TDE2_OPT_S *pstOpt);
+STATIC HI_S32 TdeOsiBlitTiled(TDE_HANDLE s32Handle, TDE2_SURFACE_S *pstBackGround,
+                              TDE2_RECT_S *pstBackGroundRect, TDE2_SURFACE_S *pstForeGround,
+                              TDE2_RECT_S *pstForeGroundRect, TDE2_SURFACE_S *pstDst,
+                              TDE2_RECT_S *pstDstRect, TDE2_OPT_S *pstOpt);
+
+STATIC HI_BOOL TdeOsiRectTooLarge(TDE2_RECT_S *pstRect)
+{
+    return (pstRect && ((pstRect->u32Width > TDE_MAX_RECT_WIDTH) ||
+                        (pstRect->u32Height > TDE_MAX_RECT_HEIGHT))) ? HI_TRUE : HI_FALSE;
+}
+
+STATIC HI_U32 TdeOsiTileDim(HI_U32 u32Pos, HI_U32 u32Total, HI_U32 u32Max)
+{
+    HI_U32 u32Left = u32Total - u32Pos;
+    return (u32Left > u32Max) ? u32Max : u32Left;
+}
+
+STATIC HI_S32 TdeOsiQuickCopyTiled(TDE_HANDLE s32Handle, TDE2_SURFACE_S *pstSrc,
+                                   TDE2_RECT_S *pstSrcRect, TDE2_SURFACE_S *pstDst,
+                                   TDE2_RECT_S *pstDstRect)
+{
+    HI_U32 x, y;
+    if (pstSrcRect->u32Width != pstDstRect->u32Width ||
+        pstSrcRect->u32Height != pstDstRect->u32Height)
+        return HI_ERR_TDE_UNSUPPORTED_OPERATION;
+    for (y = 0; y < pstDstRect->u32Height; y += TDE_MAX_RECT_HEIGHT) {
+        for (x = 0; x < pstDstRect->u32Width; x += TDE_MAX_RECT_WIDTH) {
+            TDE2_RECT_S stS = *pstSrcRect;
+            TDE2_RECT_S stD = *pstDstRect;
+            HI_S32 s32Ret;
+            stS.u32Width = stD.u32Width = TdeOsiTileDim(x, pstDstRect->u32Width, TDE_MAX_RECT_WIDTH);
+            stS.u32Height = stD.u32Height = TdeOsiTileDim(y, pstDstRect->u32Height, TDE_MAX_RECT_HEIGHT);
+            stS.s32Xpos = pstSrcRect->s32Xpos + (HI_S32)x;
+            stS.s32Ypos = pstSrcRect->s32Ypos + (HI_S32)y;
+            stD.s32Xpos = pstDstRect->s32Xpos + (HI_S32)x;
+            stD.s32Ypos = pstDstRect->s32Ypos + (HI_S32)y;
+            s32Ret = TdeOsiQuickCopy(s32Handle, pstSrc, &stS, pstDst, &stD);
+            if (s32Ret < 0)
+                return s32Ret;
+        }
+    }
+    return HI_SUCCESS;
+}
+
+STATIC HI_S32 TdeOsiSolidDrawTiled(TDE_HANDLE s32Handle, TDE2_SURFACE_S *pstSrc,
+                                   TDE2_RECT_S *pstSrcRect, TDE2_SURFACE_S *pstDst,
+                                   TDE2_RECT_S *pstDstRect, TDE2_FILLCOLOR_S *pstFillColor,
+                                   TDE2_OPT_S *pstOpt)
+{
+    HI_U32 x, y;
+
+    if (pstSrcRect && (pstSrcRect->u32Width != pstDstRect->u32Width ||
+                       pstSrcRect->u32Height != pstDstRect->u32Height))
+        return HI_ERR_TDE_UNSUPPORTED_OPERATION;
+    for (y = 0; y < pstDstRect->u32Height; y += TDE_MAX_RECT_HEIGHT) {
+        for (x = 0; x < pstDstRect->u32Width; x += TDE_MAX_RECT_WIDTH) {
+            TDE2_RECT_S stD = *pstDstRect;
+            TDE2_RECT_S stS = {0};
+            HI_S32 s32Ret;
+            stD.u32Width = TdeOsiTileDim(x, pstDstRect->u32Width, TDE_MAX_RECT_WIDTH);
+            stD.u32Height = TdeOsiTileDim(y, pstDstRect->u32Height, TDE_MAX_RECT_HEIGHT);
+            stD.s32Xpos = pstDstRect->s32Xpos + (HI_S32)x;
+            stD.s32Ypos = pstDstRect->s32Ypos + (HI_S32)y;
+            if (pstSrcRect) {
+                stS = *pstSrcRect;
+                stS.u32Width = stD.u32Width;
+                stS.u32Height = stD.u32Height;
+                stS.s32Xpos = pstSrcRect->s32Xpos + (HI_S32)x;
+                stS.s32Ypos = pstSrcRect->s32Ypos + (HI_S32)y;
+            }
+            s32Ret = TdeOsiSolidDraw(s32Handle, pstSrc, pstSrcRect ? &stS : NULL,
+                                     pstDst, &stD, pstFillColor, pstOpt);
+            if (s32Ret < 0)
+                return s32Ret;
+        }
+    }
+    return HI_SUCCESS;
+}
+
+STATIC HI_S32 TdeOsiBlitTiled(TDE_HANDLE s32Handle, TDE2_SURFACE_S *pstBackGround,
+                              TDE2_RECT_S *pstBackGroundRect, TDE2_SURFACE_S *pstForeGround,
+                              TDE2_RECT_S *pstForeGroundRect, TDE2_SURFACE_S *pstDst,
+                              TDE2_RECT_S *pstDstRect, TDE2_OPT_S *pstOpt)
+{
+    HI_U32 x, y;
+    HI_U32 u32W = pstDstRect->u32Width;
+    HI_U32 u32H = pstDstRect->u32Height;
+
+    if (pstBackGroundRect && (pstBackGroundRect->u32Width != u32W ||
+                              pstBackGroundRect->u32Height != u32H))
+        return HI_ERR_TDE_UNSUPPORTED_OPERATION;
+    if (pstForeGroundRect && (pstForeGroundRect->u32Width != u32W ||
+                              pstForeGroundRect->u32Height != u32H))
+        return HI_ERR_TDE_UNSUPPORTED_OPERATION;
+    for (y = 0; y < u32H; y += TDE_MAX_RECT_HEIGHT) {
+        for (x = 0; x < u32W; x += TDE_MAX_RECT_WIDTH) {
+            TDE2_RECT_S stD = *pstDstRect;
+            TDE2_RECT_S stF = {0};
+            TDE2_RECT_S stB = {0};
+            TDE2_RECT_S *pstF = NULL, *pstB = NULL;
+            HI_S32 s32Ret;
+
+            stD.u32Width = TdeOsiTileDim(x, u32W, TDE_MAX_RECT_WIDTH);
+            stD.u32Height = TdeOsiTileDim(y, u32H, TDE_MAX_RECT_HEIGHT);
+            stD.s32Xpos = pstDstRect->s32Xpos + (HI_S32)x;
+            stD.s32Ypos = pstDstRect->s32Ypos + (HI_S32)y;
+            if (pstForeGroundRect) {
+                stF = *pstForeGroundRect;
+                stF.u32Width = stD.u32Width;
+                stF.u32Height = stD.u32Height;
+                stF.s32Xpos = pstForeGroundRect->s32Xpos + (HI_S32)x;
+                stF.s32Ypos = pstForeGroundRect->s32Ypos + (HI_S32)y;
+                pstF = &stF;
+            }
+            if (pstBackGroundRect) {
+                stB = *pstBackGroundRect;
+                stB.u32Width = stD.u32Width;
+                stB.u32Height = stD.u32Height;
+                stB.s32Xpos = pstBackGroundRect->s32Xpos + (HI_S32)x;
+                stB.s32Ypos = pstBackGroundRect->s32Ypos + (HI_S32)y;
+                pstB = &stB;
+            }
+            s32Ret = TdeOsiBlit(s32Handle, pstBackGround, pstB, pstForeGround, pstF,
+                                pstDst, &stD, pstOpt);
+            if (s32Ret < 0)
+                return s32Ret;
+        }
+    }
+    return HI_SUCCESS;
+}
+
 HI_S32 TdeOsiQuickCopy(TDE_HANDLE s32Handle, TDE2_SURFACE_S *pstSrc, TDE2_RECT_S  *pstSrcRect,
                        TDE2_SURFACE_S *pstDst, TDE2_RECT_S *pstDstRect)
 {
     HI_S32 Ret = HI_SUCCESS;
     HI_GFX_LOG_FuncEnter(gs_TdeDebugInterApi);
+
+#ifndef HI_BUILD_IN_BOOT
+    if (TdeOsiRectTooLarge(pstDstRect))
+        return TdeOsiQuickCopyTiled(s32Handle, pstSrc, pstSrcRect, pstDst, pstDstRect);
+#endif
     TDE_CHECK_NULLPOINTER_RETURN_VALUE(pstSrc, HI_ERR_TDE_NULL_PTR);
     TDE_CHECK_NULLPOINTER_RETURN_VALUE(pstSrcRect, HI_ERR_TDE_NULL_PTR);
     TDE_CHECK_NULLPOINTER_RETURN_VALUE(pstDst, HI_ERR_TDE_NULL_PTR);
@@ -5458,6 +5624,12 @@ HI_S32 TdeOsiBlit(TDE_HANDLE s32Handle,
 #endif
     HI_S32 s32Ret = 0;
     HI_GFX_LOG_FuncEnter(gs_TdeDebugInterApi);
+
+#ifndef HI_BUILD_IN_BOOT
+    if (TdeOsiRectTooLarge(pstDstRect))
+        return TdeOsiBlitTiled(s32Handle, pstBackGround, pstBackGroundRect,
+                               pstForeGround, pstForeGroundRect, pstDst, pstDstRect, pstOpt);
+#endif
 
 #ifndef HI_BUILD_IN_BOOT
     enOptCategory = TdeOsiGetOptCategory(pstBackGround, pstBackGroundRect,
@@ -6176,6 +6348,85 @@ EXPORT_SYMBOL(TdeOsiBitmapMaskBlend);
 * Return:        HI_SUCCESS/HI_FAILURE
 * Others:        none
 *****************************************************************************/
+/* v16q: solid-fill with alpha blending.  The v2_0 fill opcode does not read
+ * the destination, so SolidDraw(alpha) cannot mix with dst.  Emulate it with a
+ * Bitblit whose foreground is a persistent 1x1 CLUT8 surface (CLUT[0] holds the
+ * premultiplied fill colour) stretched over dst with bResize; Bitblit does read
+ * dst and blends (board probe: 0x80800000 over 0xff102030 -> 0x80881018).
+ * Only used when alpha < 255 and dst is ARGB8888. */
+#ifndef HI_BUILD_IN_BOOT
+STATIC HI_S32 TdeOsiSolidDrawBlend(TDE_HANDLE s32Handle, TDE2_SURFACE_S *pstDst,
+                                   TDE2_RECT_S *pstDstRect, TDE2_FILLCOLOR_S *pstFillColor,
+                                   TDE2_OPT_S *pstOpt, HI_U8 u8Alpha)
+{
+    static void *s_idx_va;
+    static dma_addr_t s_idx_phy;
+    static void *s_clut_va;
+    static dma_addr_t s_clut_phy;
+    static HI_BOOL s_alloced = HI_FALSE;
+    extern int tde_port_ctrl_alloc(void **virt, dma_addr_t *phys);
+    extern void tde_port_ctrl_sync(void *virt, dma_addr_t phys, unsigned size, int to_dev);
+    TDE2_SURFACE_S stFg = {0};
+    TDE2_RECT_S stOne = {0, 0, 1, 1};
+    TDE2_OPT_S stBlendOpt = {0};
+    HI_U32 u32FillData = 0;
+    HI_U32 r, g, b;
+    HI_U8 *pu8Idx;
+    HI_U32 *pu32Clut;
+
+    if (!s_alloced) {
+        if (tde_port_ctrl_alloc(&s_idx_va, &s_idx_phy) < 0 ||
+            tde_port_ctrl_alloc(&s_clut_va, &s_clut_phy) < 0) {
+            TDE_ERROR("blend fallback: ctrl buffer alloc failed\n");
+            return HI_ERR_TDE_NO_MEM;
+        }
+        s_alloced = HI_TRUE;
+    }
+    if (TdeOsiColorConvert(pstFillColor, pstDst, &u32FillData) < 0)
+        return HI_ERR_TDE_INVALID_PARA;
+
+    r = ((u32FillData >> 16) & 0xff) * (HI_U32)u8Alpha;
+    g = ((u32FillData >> 8) & 0xff) * (HI_U32)u8Alpha;
+    b = (u32FillData & 0xff) * (HI_U32)u8Alpha;
+    r = (r + 127) / 255;
+    g = (g + 127) / 255;
+    b = (b + 127) / 255;
+
+    pu8Idx = (HI_U8 *)s_idx_va;
+    pu32Clut = (HI_U32 *)s_clut_va;
+    pu8Idx[0] = 0;
+    HI_GFX_Memset(pu32Clut, 0, 256 * sizeof(HI_U32));
+    pu32Clut[0] = ((HI_U32)u8Alpha << 24) | ((r & 0xff) << 16) | ((g & 0xff) << 8) | (b & 0xff);
+
+    stFg.u32PhyAddr = (HI_U32)s_idx_phy;
+    stFg.enColorFmt = TDE2_COLOR_FMT_CLUT8;
+    stFg.u32Width = 1;
+    stFg.u32Height = 1;
+    stFg.u32Stride = 1;
+    stFg.pu8ClutPhyAddr = (HI_U8 *)(uintptr_t)s_clut_phy;
+    stFg.bAlphaMax255 = HI_TRUE;
+
+    stBlendOpt.enAluCmd = TDE2_ALUCMD_BLEND;
+    stBlendOpt.stBlendOpt.bPixelAlphaEnable = HI_TRUE;
+    stBlendOpt.stBlendOpt.bSrc1AlphaPremulti = HI_FALSE;
+    stBlendOpt.stBlendOpt.eBlendCmd =
+        (pstOpt->stBlendOpt.eBlendCmd != TDE2_BLENDCMD_NONE) ?
+        pstOpt->stBlendOpt.eBlendCmd : TDE2_BLENDCMD_SRCOVER;
+    stBlendOpt.enClipMode = pstOpt->enClipMode;
+    stBlendOpt.stClipRect = pstOpt->stClipRect;
+    stBlendOpt.enColorKeyMode = pstOpt->enColorKeyMode;
+    stBlendOpt.unColorKeyValue = pstOpt->unColorKeyValue;
+    stBlendOpt.bResize = HI_TRUE;
+    stBlendOpt.bClutReload = HI_TRUE;
+    stBlendOpt.enOutAlphaFrom = TDE2_OUTALPHA_FROM_FOREGROUND;
+
+    tde_port_ctrl_sync(s_idx_va, s_idx_phy, PAGE_SIZE, 1);
+    tde_port_ctrl_sync(s_clut_va, s_clut_phy, PAGE_SIZE, 1);
+    return TdeOsiBlit(s32Handle, pstDst, pstDstRect, &stFg, &stOne,
+                      pstDst, pstDstRect, &stBlendOpt);
+}
+#endif
+
 HI_S32  TdeOsiSolidDraw(TDE_HANDLE s32Handle, TDE2_SURFACE_S *pstSrc, TDE2_RECT_S  *pstSrcRect,
                         TDE2_SURFACE_S *pstDst,
                         TDE2_RECT_S  *pstDstRect, TDE2_FILLCOLOR_S *pstFillColor,
@@ -6184,6 +6435,35 @@ HI_S32  TdeOsiSolidDraw(TDE_HANDLE s32Handle, TDE2_SURFACE_S *pstSrc, TDE2_RECT_
     HI_S32 Ret = HI_SUCCESS;
     HI_GFX_LOG_FuncEnter(gs_TdeDebugInterApi);
 
+#ifndef HI_BUILD_IN_BOOT
+    if (TdeOsiRectTooLarge(pstDstRect))
+        return TdeOsiSolidDrawTiled(s32Handle, pstSrc, pstSrcRect, pstDst, pstDstRect,
+                                    pstFillColor, pstOpt);
+#endif
+
+#ifndef HI_BUILD_IN_BOOT
+    /* v16q: fill path cannot mix with dst; emulate alpha fill via Bitblit. */
+    if (pstOpt && (TDE2_ALUCMD_BLEND == pstOpt->enAluCmd) &&
+        (TDE2_COLOR_FMT_ARGB8888 == pstDst->enColorFmt))
+    {
+        HI_U32 u32FillData = 0;
+        HI_U8 u8Alpha = 0xff;
+
+        if (TdeOsiColorConvert(pstFillColor, pstDst, &u32FillData) == HI_SUCCESS)
+        {
+            u8Alpha = (HI_U8)((u32FillData >> 24) & 0xff);
+            if (pstOpt->stBlendOpt.bGlobalAlphaEnable)
+                u8Alpha = (HI_U8)(((HI_U32)u8Alpha * (HI_U32)pstOpt->u8GlobalAlpha + 127) / 255);
+            if (u8Alpha < 255)
+            {
+                Ret = TdeOsiSolidDrawBlend(s32Handle, pstDst, pstDstRect,
+                                           pstFillColor, pstOpt, u8Alpha);
+                HI_GFX_LOG_FuncExit(gs_TdeDebugInterApi);
+                return Ret;
+            }
+        }
+    }
+#endif
     if (NULL == pstSrc)
     {
         Ret = TdeOsi1SourceFill(s32Handle, pstDst, pstDstRect, pstFillColor, pstOpt);

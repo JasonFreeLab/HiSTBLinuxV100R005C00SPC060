@@ -45,6 +45,7 @@ typedef HI_S32 HI_PNG_HANDLE;
 #define HI_PNG_TRANSFORM_8TO4                   0x100    /* 8bit to 4bit        */
 #define HI_PNG_TRANSFORM_CLUT2RGB               0x200    /* clut to RGB         */
 #define HI_PNG_TRANSFORM_PREMULTI_ALPHA         0x400    /* premulti alpha      */
+#define HI_PNG_TRANSFORM_INTERLACE              0x80000000 /* Adam7 interlace (driver stitches passes; reserved bit) */
 
 /* enumerations of png color format */
 typedef enum hiPNG_IMAGEFMT_E

@@ -23,6 +23,27 @@ Date                     Author           Modification
 #include <linux/version.h>
 #include <linux/module.h>
 #include <linux/moduleparam.h>
+
+/* 7.3 port diagnostics */
+extern unsigned int tde_mmz_live_entries;
+extern unsigned long long tde_mmz_live_bytes;
+extern void wmem_dump_free(const char *tag);
+extern unsigned int tde_load_seq;
+extern int tde_port_clock_on(void);
+extern volatile int tde_poll_active;
+extern int tde_port_clock_force_on(void);
+extern int tde_keep_clock;
+extern HI_VOID TdeHalSetClock(HI_BOOL bEnable);
+extern void TdeOsiListDebugInfo(HI_U32 *pending, HI_U32 *jobs, HI_U32 *working);
+extern void wmem_dump_free(const char *tag);
+unsigned int g_TdeOpenCnt = 0;
+unsigned int tde_job_done = 0;
+module_param(tde_job_done, uint, 0444);
+MODULE_PARM_DESC(tde_job_done, "completed job count (read only)");
+
+/* 7.3 port: TDE dma_alloc accounting (defined in tde_port_stubs.c) */
+extern unsigned int tde_mmz_live_entries;
+extern unsigned long long tde_mmz_live_bytes;
 #include <linux/init.h>
 #include <linux/miscdevice.h>
 #include <linux/kernel.h>
@@ -42,6 +63,15 @@ Date                     Author           Modification
 #include "hi_tde_type.h"
 #include "hi_drv_tde.h"
 #include "tde_osictl.h"
+
+#include <linux/moduleparam.h>
+/*== 7.3 port: IRQ diagnostics without /proc/interrupts ================*/
+unsigned int tde_irq_cnt = 0;
+module_param(tde_irq_cnt, uint, 0444);
+MODULE_PARM_DESC(tde_irq_cnt, "TDE IRQ count (read only)");
+int tde_dbg = 0;
+module_param(tde_dbg, int, 0644);
+MODULE_PARM_DESC(tde_dbg, "1 = print every TDE IRQ status");
 #include "tde_osilist.h"
 #include "tde_hal.h"
 #include "tde_handle.h"
@@ -140,7 +170,7 @@ TDE_CTL_FUNC_DISPATCH_ITEM g_paTdeCtlFuncDispatchItem[] = { { 0 , NULL}, \
     }while(0)
 
 STATIC int tde_osr_isr(int irq, void *dev_id);
-STATIC void tde_tasklet_func(unsigned long int_status);
+STATIC void tde_tasklet_func(struct tasklet_struct *tde_tasklet_p);
 
 STATIC atomic_t g_TDECount = ATOMIC_INIT(0);
 
@@ -155,10 +185,10 @@ TDE_timeval_s g_stTimeEnd;
 HI_U64 g_u64TimeDiff;
 #endif
 
-DECLARE_TASKLET(tde_tasklet, tde_tasklet_func, 0);
+DECLARE_TASKLET(tde_tasklet, tde_tasklet_func);
 
 #ifdef CONFIG_TDE_TDE_EXPORT_FUNC
-STATIC TDE_EXPORT_FUNC_S s_TdeExportFuncs =
+TDE_EXPORT_FUNC_S g_tde_export_funcs =
 {
     .pfnTdeModInit          = TDE_DRV_ModInit,
     .pfnTdeModExit          = TDE_DRV_ModExit,
@@ -188,6 +218,8 @@ STATIC TDE_EXPORT_FUNC_S s_TdeExportFuncs =
     .pfnTdeGetWorkingFlag    = TdeOsiListGetWorkingFlag,
     .pfnTdeSetWorkingFlag    = TdeOsiListSetWorkingFlag
 };
+/* PNG/task interop: expose the table by symbol */
+EXPORT_SYMBOL_GPL(g_tde_export_funcs);
 #endif
 
 /******************************* API declaration *******************************************/
@@ -206,6 +238,16 @@ STATIC TDE_EXPORT_FUNC_S s_TdeExportFuncs =
 HI_S32 tde_init_module_k(HI_VOID)
 {
     HI_S32 Ret = HI_FAILURE;
+
+    /* 7.3 port: map CRG/register windows + TDE GIC SPI before HAL init */
+    {
+        extern int port_stubs_init(void);
+        if (port_stubs_init() != 0)
+        {
+            pr_err("TDEDBG: port_stubs_init failed, abort module init\r\n");
+            return -1;
+        }
+    }
 
     if (TdeHalInit(TDE_REG_BASEADDR) < 0)
     {
@@ -238,7 +280,12 @@ HI_S32 tde_init_module_k(HI_VOID)
 
     TdeOsiListInit();
 
-    Ret = HI_GFX_MODULE_Register(HIGFX_TDE_ID, TDE_NAME, &s_TdeExportFuncs);
+    /* 7.3 port: keep TDE clock on after init (poll reads INT every 2ms) */
+    tde_keep_clock = 1;
+    TdeHalSetClock(HI_TRUE);
+    pr_err("TDEDBG: init: TDE clock forced ON (keep_clock=%d)\r\n", tde_keep_clock);
+
+    Ret = HI_GFX_MODULE_Register(HIGFX_TDE_ID, TDE_NAME, &g_tde_export_funcs);
     if (HI_SUCCESS != Ret)
     {
         TDE_ERROR("register module failed!\n");
@@ -249,6 +296,24 @@ HI_S32 tde_init_module_k(HI_VOID)
     spin_lock_init(&s_taskletlock);
 
     spin_lock_init(&s_TdeRefLock);
+
+    /* 7.3 port: start the no-IRQ completion poll only now that TdeHalInit /
+     * TdeOsiListInit have completed.  Starting it in port_stubs_init() let the
+     * 2 ms worker run against half-initialised lists on repeated module loads
+     * (r5b loop died at iteration 6). */
+    {
+        extern void tde_port_poll_start(void);
+        extern int tde_port_irq_in_use(void);
+        if (tde_port_irq_in_use()) {
+            pr_err("TDEDBG: init: real IRQ active -> poll NOT started\r\n");
+        } else {
+            tde_port_poll_start();
+        }
+    }
+    pr_err("TDEDBG: init done (mmz live entries=%u bytes=%llu)\r\n",
+           tde_mmz_live_entries, tde_mmz_live_bytes);
+    wmem_dump_free("init");
+    tde_job_done = 0;
 
     return 0;
 }
@@ -264,9 +329,20 @@ HI_S32 tde_init_module_k(HI_VOID)
 ***************************************************************************************/
 HI_VOID tde_cleanup_module_k(HI_VOID)
 {
+    pr_err("TDEDBG: cleanup begin\r\n");
+    /* 7.3 port: stop the completion poll FIRST - the worker calls
+     * TdeOsiListNodeComp()/TdeOsiListComp(); letting it run concurrently with
+     * TdeOsiListTerm()/TdeHalRelease() is a use-after-free race (10x reload hang). */
+    {
+        extern void tde_port_poll_stop(void);
+        tde_port_poll_stop();
+    }
+    pr_err("TDEDBG: cleanup: poll stopped\r\n");
     HI_GFX_MODULE_UnRegister(HIGFX_TDE_ID);
+    pr_err("TDEDBG: cleanup: module unregistered\r\n");
 
     TdeOsiListTerm();
+    pr_err("TDEDBG: cleanup: list term done\r\n");
 
 #ifndef TDE_HWC_COOPERATE
     osal_free_irq(TDE_INTNUM, "tde", NULL);
@@ -275,6 +351,21 @@ HI_VOID tde_cleanup_module_k(HI_VOID)
 #endif
 
     TdeHalRelease();
+
+    /* 7.3 port: allow the clock to be disabled again at teardown */
+    tde_keep_clock = 0;
+    TdeHalSetClock(HI_FALSE);
+    pr_err("TDEDBG: cleanup: TDE clock off\r\n");
+
+    /* 7.3 port: free dma_alloc_coherent MMZ only after the TDE lists and
+     * HAL have been torn down - freeing first made TdeOsiListTerm()
+     * dereference freed window memory (rmmod oops, probe-only instance). */
+    {
+        extern void port_tde_dma_cleanup(void);
+        port_tde_dma_cleanup();
+    }
+    pr_err("TDEDBG: cleanup done (tde mmz live entries=%u bytes=%llu)\r\n",
+           tde_mmz_live_entries, tde_mmz_live_bytes);
 
     return;
 }
@@ -287,6 +378,9 @@ HI_S32 tde_open(struct inode *finode, struct file  *ffile)
     HI_GFX_UNF_FuncEnter(gs_TdeDebugUnf);
 
     atomic_inc(&g_TDECount);
+    g_TdeOpenCnt++;
+    if (tde_dbg)
+        pr_err("TDEDBG: open_cnt=%u (count=%d)\r\n", g_TdeOpenCnt, atomic_read(&g_TDECount));
 
     HI_GFX_UNF_FuncExit(gs_TdeDebugUnf);
 
@@ -334,6 +428,17 @@ HI_S32 tde_release(struct inode *finode, struct file  *ffile)
         atomic_set(&g_TDECount, 0);
     }
 
+    if (tde_dbg)
+    {
+        HI_U32 pending = 0, jobs = 0, working = 0;
+        TdeOsiListDebugInfo(&pending, &jobs, &working);
+        pr_err("TDEDBG: close_cnt=%u count=%d pending=%u jobs=%u working=%u job_done=%u\r\n",
+               g_TdeOpenCnt, atomic_read(&g_TDECount), pending, jobs, working, tde_job_done);
+        wmem_dump_free("close");
+        pr_err("TDEDBG: close mmz live entries=%u bytes=%llu\r\n",
+               tde_mmz_live_entries, tde_mmz_live_bytes);
+    }
+
     HI_GFX_UNF_FuncExit(gs_TdeDebugUnf);
 
     return 0;
@@ -376,7 +481,24 @@ long tde_ioctl(struct file *ffile, unsigned int cmd, unsigned long arg)
         return -EFAULT;
     }
 
-    return g_paTdeCtlFuncDispatchItem[u8Cmd].tde_ctl_ptr_func(argp,ffile);
+    {
+        long _r;
+        if (cmd == TDE_END_JOB || cmd == TDE_WAITFORDONE || cmd == TDE_WAITALLDONE) {
+            (void)tde_port_clock_force_on();   /* INT/poll must not read a gated window */
+            tde_poll_active = 1;
+            if (tde_dbg)
+                pr_err("TDEDBG: ioctl[%u] active=1 (job submit/wait cmd=%08x)\r\n",
+                       u8Cmd, cmd);
+        }
+        if (tde_dbg)
+            pr_err("TDEDBG: ioctl[%u] enter pid=%d\r\n", u8Cmd, (int)current->pid);
+        _r = g_paTdeCtlFuncDispatchItem[u8Cmd].tde_ctl_ptr_func(argp,ffile);
+        if (tde_dbg)
+            pr_err("TDEDBG: ioctl[%u] exit rc=%ld\r\n", u8Cmd, _r);
+        return _r;
+        /* NOTE: tde_poll_active is cleared by the poll worker when the
+         * completion is processed; async jobs may still be in flight here. */
+    }
 }
 
 STATIC HI_S32 TdeOsrBeginJob(unsigned long *argp,struct file *ffile)
@@ -1054,6 +1176,15 @@ STATIC int tde_osr_isr(int irq, void *dev_id)
     (HI_VOID)TDE_gettimeofday(&g_stTimeStart);
 #endif
     int_status = TdeHalCtlIntStats();
+    tde_irq_cnt++;
+    if (tde_dbg)
+        pr_err("TDEDBG: irq=%d status=%08x cnt=%u\n", irq, int_status, tde_irq_cnt);
+    if (0 == int_status)
+    {
+        if (tde_dbg)
+            pr_err("TDEDBG: irq=%d status=0 -> IRQ_NONE\n", irq);
+        return IRQ_NONE;
+    }
 
     if (int_status & TDE_DRV_INT_ERROR)
     {
@@ -1101,8 +1232,9 @@ STATIC int tde_osr_isr(int irq, void *dev_id)
     return IRQ_HANDLED;
 }
 
-STATIC void tde_tasklet_func(unsigned long int_status)
+STATIC void tde_tasklet_func(struct tasklet_struct *tde_tasklet_p)
 {
+    unsigned long int_status = tde_tasklet_p->data;
     HI_SIZE_T lockflags;
     TDE_LOCK(&s_taskletlock, lockflags);
     tde_tasklet.data &= (~int_status);
@@ -1130,6 +1262,66 @@ STATIC void tde_tasklet_func(unsigned long int_status)
 #endif
 
 }
+/*== FINAL-FIX: polling completion for the no-IRQ path ==================
+ * TDE may have no usable IRQ line on this board.  A 2 ms delayed work in
+ * the port stubs calls this to emulate the ISR: read+clear TDE_INT and
+ * run the same node-completion path as the tasklet. */
+int tde_poll_complete(void)
+{
+    HI_U32 int_status;
+
+    /* NOTE: completion must not depend on the clock_on probe (it was seen to
+     * read 0 on this board, which starved all completions).  The poll worker
+     * only calls this function when a job is active/queued; at that point the
+     * TDE clock is driven by the job path and reading INT is required. */
+    int_status = TdeHalCtlIntStats();
+
+    if (0 == int_status)
+        return 0;
+    tde_irq_cnt++;
+    if (tde_dbg)
+        pr_err("TDEDBG: poll status=%08x cnt=%u\r\n", int_status, tde_irq_cnt);
+    if (int_status & 0x1u)   /* TDE_DRV_INT_NODE */
+        TdeOsiListNodeComp();
+    TdeOsiListComp();
+    tde_job_done++;
+    tde_poll_active = 0;   /* completion processed */
+    if (tde_dbg)
+    {
+        {
+            HI_U32 pending = 0, jobs = 0, working = 0;
+            TdeOsiListDebugInfo(&pending, &jobs, &working);
+            pr_err("TDEDBG: job done seq=%u job_done=%u pending=%u jobs=%u working=%u\r\n",
+                   tde_load_seq, tde_job_done, pending, jobs, working);
+        }
+        wmem_dump_free("after-job");
+    }
+    return 1;
+}
+EXPORT_SYMBOL(tde_poll_complete);
+
+/* 7.3 port: any active/queued TDE job?  Poll worker skips register access when
+ * this is false (idle hardware has its clock gated by TdeOsiListNodeComp). */
+int tde_has_active_job(void)
+{
+    HI_U32 pending = 0, jobs = 0, working = 0;
+    TdeOsiListDebugInfo(&pending, &jobs, &working);
+    if (pending || jobs || working)
+        return 1;
+    return 0;
+}
+EXPORT_SYMBOL(tde_has_active_job);
+
+/* debug snapshot for the poll worker (tde_dbg only) */
+void tde_poll_debug(HI_U32 ticks)
+{
+    HI_U32 pending = 0, jobs = 0, working = 0;
+    TdeOsiListDebugInfo(&pending, &jobs, &working);
+    pr_err("TDEDBG: poll tick=%u clock_on=%d active=%d pending=%u jobs=%u working=%u job_done=%u\r\n",
+           ticks, tde_port_clock_on(), tde_poll_active, pending, jobs, working, tde_job_done);
+}
+EXPORT_SYMBOL(tde_poll_debug);
+
 
 #ifdef CONFIG_TDE_PM_ENABLE
 HI_S32 tde_suspend(PM_BASEDEV_S *pdev, pm_message_t state)

@@ -32,6 +32,16 @@ Date                         Author                     Modification
 #include "hi_reg_common.h"
 #include "hi_drv_sys.h"
 
+#include <linux/module.h>
+/*== FINAL-FIX: sync decode wait budget (1080p ~100 ms, 64MP needs seconds) ==*/
+unsigned int png_wait_ms = 10000;
+module_param(png_wait_ms, uint, 0644);
+MODULE_PARM_DESC(png_wait_ms, "sync decode wait budget in ms (default 10000)");
+/*== FINAL-FIX(v3): clock/reset teardown in FINISH ISR (0 = keep clock on) ==*/
+unsigned int png_clkoff_on_finish = 0;
+module_param(png_clkoff_on_finish, uint, 0644);
+MODULE_PARM_DESC(png_clkoff_on_finish, "1 = old behaviour: gate clock/reset in FINISH ISR");
+
 static volatile PNG_HAL_REGISTER_S *g_pstPngReg = HI_NULL;
 
 static HI_U32 g_u32PngIrqNum  = 0;
@@ -88,7 +98,13 @@ HI_S32 PngHalOpen(HI_VOID)
 
     PngHalSetRdcAddr(g_u32RdcBufPhyaddr);
 
-    g_pstPngReg->u32AXIConfig    = 0x20441;
+    /*== FINAL-FIX: u32AXIConfig must be 0 on this port =====================
+ * Vendor suggested 0x20441 ("Suggest value is 0x20441" in R005/R006 png_hal.h).
+ * On the Hi3798MV300 mainline port it makes PNGD stall silently after ~15 rows
+ * (~1 KB of IDAT): no IRQ, no error bit, RstBusy=1.  u32AXIConfig=0 gives full
+ * 1920x1080 hardware decode, bit-exact, rc=0/FINISH ~100 ms, 7xRESUME+FINISH.
+ * ==================================================================== */
+    g_pstPngReg->u32AXIConfig    = 0x0;
     g_pstPngReg->u32TimeOut      = 0x80008;
     g_pstPngReg->uIntMask.u32All = 0xffffffff;
     g_pstPngReg->uErrMode.u32All = 0xffff0000;
@@ -166,12 +182,13 @@ HI_VOID PngHalReset(HI_VOID)
     unTempValue.bits.pgd_srst_req = 0x0;
     g_pstRegCrg->PERI_CRG33.u32 = unTempValue.u32;
 
-    /* recover value */
-    g_pstPngReg->u32AXIConfig    = u32AXIConfig;
-    g_pstPngReg->u32TimeOut      = u32TimeOut;
+    /* FINAL-FIX(v3): do NOT restore AXI/TimeOut/ErrMode/IntMask from a
+     * readback taken while the block may be clock-gated or in reset: a 0
+     * readback would silently restore uIntMask=0 and mask FINISH on the
+     * next decode.  PngHalOpen() programs all of them right after this. */
+    pr_err("PNGDBG: Reset readback AXI=%08x TMO=%08x EMode=%08x IMask=%08x (pre-reset, may be 0 when gated)\n",
+           (unsigned)u32AXIConfig, (unsigned)u32TimeOut, (unsigned)u32ErrMode, (unsigned)u32IntMask);
     g_pstPngReg->u32RdcStAddr    = u32RdcPhyaddr;
-    g_pstPngReg->uErrMode.u32All = u32ErrMode;
-    g_pstPngReg->uIntMask.u32All = u32IntMask;
 
 #ifdef CONFIG_GFX_MMU_SUPPORT
     g_pstPngReg->uMmuBypass.stBits.u32RdcRdMmuBypass = 0x0;
@@ -182,6 +199,55 @@ HI_VOID PngHalReset(HI_VOID)
 #endif
     HI_GFX_LOG_FuncExit(gs_PngDebugInterApi);
     return;
+}
+
+
+HI_U32 PngHalGetIntRaw(HI_VOID)
+{
+    return g_pstPngReg ? g_pstPngReg->uInt.u32All : 0;
+}
+HI_U32 PngHalGetErrStatics(HI_VOID)
+{
+    return g_pstPngReg ? g_pstPngReg->uErrStatics.u32All : 0;
+}
+const char *PngHalErrNames(HI_U32 u32Int)
+{
+    static char b[192];
+    static const char *nm[16] = {
+        "FmtBuf", "FltBuf", "RdcBuf", "FltType", "DecCpy", "HuffDec",
+        "ZlibHdist", "ZlibHlit", "ZlibLen", "ZlibBtype", "ZlibFcheck",
+        "ZlibFdict", "ZlibCinfo", "ZlibCm", "Adler", "Crc" };
+    int i, o = 0;
+    b[0] = 0;
+    for (i = 0; i < 16; i++)
+        if ((u32Int & (1u << (16 + i))) && (o < (int)sizeof(b) - 16))
+            o += snprintf(b + o, sizeof(b) - o, "%s%s", o ? "," : "", nm[i]);
+    if (!o) snprintf(b, sizeof(b), "none");
+    return b;
+}
+
+
+HI_VOID PngHalSetInterlace(HI_BOOL bEnable)
+{
+    PNG_TYPE_U uType;
+    uType.u32All = g_pstPngReg->uType.u32All;
+    uType.stBits.u32InterlaceType = bEnable ? 0x1 : 0x0;
+    g_pstPngReg->uType.u32All = uType.u32All;
+}
+
+HI_VOID PngHalSetPassBuf(HI_U32 u32Pass, HI_U32 u32Phyaddr, HI_U32 u32Stride)
+{
+    switch (u32Pass)
+    {
+        case 0: g_pstPngReg->u32Pass0StAddr = u32Phyaddr; g_pstPngReg->u32Pass0Stride = u32Stride; break;
+        case 1: g_pstPngReg->u32Pass1StAddr = u32Phyaddr; g_pstPngReg->u32Pass1Stride = u32Stride; break;
+        case 2: g_pstPngReg->u32Pass2StAddr = u32Phyaddr; g_pstPngReg->u32Pass2Stride = u32Stride; break;
+        case 3: g_pstPngReg->u32Pass3StAddr = u32Phyaddr; g_pstPngReg->u32Pass3Stride = u32Stride; break;
+        case 4: g_pstPngReg->u32Pass4StAddr = u32Phyaddr; g_pstPngReg->u32Pass4Stride = u32Stride; break;
+        case 5: g_pstPngReg->u32Pass5StAddr = u32Phyaddr; g_pstPngReg->u32Pass5Stride = u32Stride; break;
+        case 6: g_pstPngReg->u32Pass6StAddr = u32Phyaddr; g_pstPngReg->u32Pass6Stride = u32Stride; break;
+        default: break;
+    }
 }
 
 HI_VOID PngHalSetSmmuClock(HI_BOOL bEnable)
@@ -284,6 +350,9 @@ HI_VOID PngHalSetClock(HI_BOOL bEnable)
                 break;
             }
         }
+
+        if (g_pstPngReg->u32RstBusy & 0x1)
+            pr_err("PNGDBG: SetClock(1) RstBusy still set after %u ms\n", (unsigned)u32TotalTime);
 
         unTempValue.u32 = g_pstRegCrg->PERI_CRG33.u32;
         unTempValue.bits.pgd_srst_req = 0x0;
@@ -595,6 +664,17 @@ HI_VOID PngHalStartDecode(HI_VOID)
     CHECK_PNG_EQUAL_UNRETURN(0, g_pstPngReg->u32FltEndAddr);
 
     g_pstPngReg->uType.u32All = uType.u32All;
+    /* FINAL-FIX(v3): clear any stale INT status (e.g. FINISH/RESUME left
+     * over from a previous decode, or a spurious level after re-enabling the
+     * clock) before starting a new decode. */
+    {
+        HI_U32 u32Stale = g_pstPngReg->uInt.u32All;
+        if (u32Stale)
+        {
+            pr_err("PNGDBG: StartDecode clears stale Int=%08x\n", (unsigned)u32Stale);
+            g_pstPngReg->uInt.u32All = u32Stale;
+        }
+    }
     g_pstPngReg->u32DecStart = 0x1;
     HI_GFX_LOG_FuncExit(gs_PngDebugInterApi);
     return;
@@ -660,7 +740,13 @@ HI_VOID PngHalSetAxiAndTimeout(HI_VOID)
     HI_GFX_LOG_FuncEnter(gs_PngDebugInterApi);
     CHECK_PNG_EQUAL_UNRETURN(NULL, g_pstPngReg);
 
-    g_pstPngReg->u32AXIConfig = 0x20441;
+    /*== FINAL-FIX: u32AXIConfig must be 0 on this port =====================
+ * Vendor suggested 0x20441 ("Suggest value is 0x20441" in R005/R006 png_hal.h).
+ * On the Hi3798MV300 mainline port it makes PNGD stall silently after ~15 rows
+ * (~1 KB of IDAT): no IRQ, no error bit, RstBusy=1.  u32AXIConfig=0 gives full
+ * 1920x1080 hardware decode, bit-exact, rc=0/FINISH ~100 ms, 7xRESUME+FINISH.
+ * ==================================================================== */
+    g_pstPngReg->u32AXIConfig = 0x0;
     g_pstPngReg->u32TimeOut   = 0x80008;
 
     HI_GFX_LOG_FuncExit(gs_PngDebugInterApi);

@@ -549,6 +549,9 @@ HI_VOID PngHalSetClock(HI_BOOL bEnable);
 HI_S32 PngHalOpen(HI_VOID);
 
 HI_U32 PngHalGetIrqNum(HI_VOID);
+HI_U32 PngHalGetIntRaw(HI_VOID);
+HI_U32 PngHalGetErrStatics(HI_VOID);
+const char *PngHalErrNames(HI_U32 u32Int);
 
 #ifdef __cplusplus
 #if __cplusplus
