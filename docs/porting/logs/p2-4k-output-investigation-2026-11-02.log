@@ -1,0 +1,12 @@
+=== 4K 输出可行性核查 Mon Nov  2 01:05:13 CST 2026
+现状证据:
+  1) hi3798_drm.c 仅定义单一 1080p60 时序（1920x1080@60），VDP G0/DHD0 均按 1080p 初始化
+  2) /sys/class/drm/card0-HDMI-A-1/modes = 1920x1080（唯一模式）
+  3) /sys/class/drm/card0-HDMI-A-1/edid 大小为 0（无 EDID 数据）
+     —— 因为 HDMI TX 寄存器块（0xF8CE0000）任何 CPU 访问都会触发内核 oops，
+        EDID/DVI 状态必须经厂商 HDMI 驱动读取，mainline 侧无法获知显示能力
+  4) max_width=4096 仅为 DRM 后端上限，不代表可输出 4K 时序
+结论:
+  4K 输出需要同时具备：EDID 识别（不可得）+ HDMI TX 4K 时序配置（不可得，bootloader 管理）
+  → 在无厂商 HDMI 驱动的前提下无法实现，维持 BLOCKED。
+  1080p60 输出已实机验证可用（用户目视 + 截图）。

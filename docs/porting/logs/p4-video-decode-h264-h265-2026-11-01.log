@@ -1,0 +1,10 @@
+=== 视频解码能力测试 Sun Nov  1 11:45:40 CST 2026
+ V....D libx265              libx265 H.265 / HEVC (codec hevc)
+-rw-r--r-- 1 root root  12M Jul 28 04:52 /root/test1080.mp4
+-rw-r--r-- 1 root root 1.6M Nov  1 11:45 /root/test1080_hevc.mp4
+--- H.264 1080p:
+150帧 elapsed=6.85 s
+--- H.265 1080p:
+60帧 elapsed=4.15 s
+ 11:45:51 up 5 min,  2 users,  load average: 6.65, 3.76, 1.63
+2026-11-01 11:44:54 up=254.34 load=5.37 2.96 1.24 memMB=619 faults=0 gpu_err=0 svc=active,active,active,active,active, wifi=Not connected.

@@ -1,0 +1,26 @@
+A1=Module Name | B1=Base Address | C1=Normal Boot | D1=Standby Wakeup | E1=Normal Chip | F1=CA Chip | G1=Module Type
+A2=peri_cfg | B2=0xf8a20000 | C2=Y | D2=Y | E2=Y | F2=Y | G2=0-NORMAL
+A3=Register | B3=Offset Address | C3=Value Written to or Read from Register | D3=delay | E3=read or write | F3= Bits to Be Read or Written | G3=Start Bit to Be Read or Written
+A4=emmc_sap_ps | B4=0x20a0 | C4=0x0 | D4=0 | E4=write | F4=2 | G4=12 | H4=emmc sample clk phase cfg
+A5=emmc_drv_ps | B5=0x20a0 | C5=0x4 | D5=0 | E5=write | F5=2 | G5=16 | H5=emmc drv clk phase cfg
+A6=PERI_CTRL | B6=0x0008 | C6=0x0 | D6=0 | E6=write | F6=0 | G6=1 | H6=SDIO0 Detect: 0: low valid
+                         1: high valid
+A7=PERI_CTRL | B7=0x0008 | C7=0x0 | D7=0 | E7=write | F7=0 | G7=5 | H7=SDIO0 CWPR: 0: low valid
+                         1: high valid
+A8=PERI_CTRL | B8=0x0008 | C8=0x1 | D8=0 | E8=write | F8=0 | G8=13 | H8=SDIO0 PWREN: 
+                         0: high valid
+                         1: low valid
+A9=PERI_CTRL | B9=0x0008 | C9=0x0 | D9=0 | E9=write | F9=0 | G9=0 | H9=SDIO1 Detect: 0: low valid
+                         1: high valid
+A10=PERI_CTRL | B10=0x0008 | C10=0x0 | D10=0 | E10=write | F10=0 | G10=6 | H10=SDIO1 CWPR: 0: low valid
+                         1: high valid
+A11=PERI_CTRL | B11=0x0008 | C11=0x1 | D11=0 | E11=write | F11=0 | G11=14 | H11=SDIO1 PWREN: 
+                         0: high valid
+                         1: low valid
+A12=PERI_CTRL | B12=0x0008 | C12=0x1 | D12=0 | E12=write | F12=1 | G12=11 | H12=Combo phy: 00:  PCIE
+                      01: USB3.0
+                      10: SATA
+                      11: Reserved
+A13=PERI_CTRL | B13=0x0008 | C13=0x1 | D13=0 | E13=write | F13=0 | G13=15 | H13=RGMII RST CMOS/OD:
+                      0: CMOS
+                      1: OD

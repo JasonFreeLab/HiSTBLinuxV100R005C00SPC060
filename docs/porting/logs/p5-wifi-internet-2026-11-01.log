@@ -1,0 +1,17 @@
+=== WiFi 连接成功 Sun Nov  1 12:25:43 CST 2026
+Connected to 00:90:4c:88:88:8a (on wlan0)
+	SSID: wifi
+	freq: 2412.0
+	RX: 349015 bytes (2097 packets)
+	TX: 19888 bytes (277 packets)
+	signal: -61 dBm
+wlan0            UP             192.168.2.27/24 metric 1024 
+default via 192.168.2.1 dev wlan0 proto dhcp src 192.168.2.27 metric 1024 
+192.168.2.0/24 dev eth0 proto kernel scope link src 192.168.2.10 
+192.168.2.0/24 dev wlan0 proto kernel scope link src 192.168.2.27 metric 1024 
+5 packets transmitted, 5 received, 0% packet loss, time 4018ms
+rtt min/avg/max/mdev = 49.441/54.444/58.267/2.969 ms
+baidu HTTP=200 time=0.069068s
+Power save: off
+PASS  23 zram swap 已启用
+===== 结果: PASS=23 WARN=0 FAIL=0 =====

@@ -6,6 +6,10 @@ cfg.mak.old
 
 # out
 out/
+source/kernel/arm-trusted-firmware/build
+
+# superpowers
+.superpowers
 
 # auto create links
 source/kernel/linux-4.4.y/drivers/bluetooth_usb
@@ -20,3 +24,18 @@ source/kernel/linux-4.4.y/.config
 
 #build.log
 build.log
+
+# ===== 2026-11-11 清理：本地工作区 / 测试证据 / 厂商资料（不入库）=====
+# 工作区与发布物（build 输出、救援 FIP、实验树、发布 tar 包）
+work/
+dist/
+# 测试证据（二进制/截图/日志），仅保留证据目录说明
+docs/porting/artifacts/**
+!docs/porting/artifacts/README.md
+# 厂商资料与参考源码（体积/版权不适合入库）
+docs/fcs850r/
+/docs/*.pdf
+ref/
+# 本地清理记录与根目录证据日志
+.cleanup/
+/VDEC0405-CLOSURE.log

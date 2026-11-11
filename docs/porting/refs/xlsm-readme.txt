@@ -1,0 +1,14 @@
+A1=normal boot
+B2=Y: execute when normal boot up
+B3=N: not execute when normal boot up
+A4=Standby Wakeup
+B5=Y: execute when wake up
+B6=N: not execute when wake up
+A7=Normal Chip
+B8=Y: execute when chip is normal(non-ca)
+B9=N: not execute when chip is normal(non-ca)
+A10=CA Chip
+B11=Y: execute when chip is CA
+B12=N: not execute when chip is CA
+A13=Module Type
+B14=module's type, should be numeric-string,eg 12-eth

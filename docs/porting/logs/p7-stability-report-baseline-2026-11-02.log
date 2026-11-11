@@ -1,0 +1,30 @@
+===== 稳定性报告 2026-11-02 00:34:07 =====
+本次启动 uptime: 0 小时 39 分
+72h 稳定性进度: 0.9%
+
+--- 本次启动采样（uptime 与当前接近的最近记录）---
+本次启动采样条数: 60
+本次启动 faults=0 采样: 60, faults>0: 0
+最新记录: 2026-11-02 00:33:25 up=2301.31 load=1.26 1.18 1.08 memMB=323 faults=0 warn_alloc=0 gpu_err=0 svc=active,active,active,active,active, wifi=Connected to 00:90:4c:88:88:8a (on wlan0)
+
+--- 历史累计（全部日志）---
+总采样: 748 条；单次最长 uptime: 2.8 小时
+历史 faults=0: 736，faults>0: 12（含早期调试阶段）
+warn_alloc 累计: 49
+
+--- 每小时自检（最近 6 次）---
+=== 2026-11-01 19:59:04 uptime=7814.90s
+===== 结果: PASS=24 WARN=0 FAIL=0 =====
+=== 2026-11-01 21:15:12 uptime=600.75s
+===== 结果: PASS=24 WARN=0 FAIL=0 =====
+=== 2026-11-01 22:19:23 uptime=603.30s
+===== 结果: PASS=24 WARN=0 FAIL=0 =====
+=== 2026-11-01 23:13:43 uptime=600.20s
+===== 结果: PASS=24 WARN=0 FAIL=0 =====
+=== 2026-11-01 23:26:02 uptime=614.81s
+===== 结果: PASS=24 WARN=0 FAIL=0 =====
+=== 2026-11-02 00:05:04 uptime=600.61s
+===== 结果: PASS=24 WARN=0 FAIL=0 =====
+
+--- 当前服务 ---
+weston=active weston-terminal=active ssh=active smbd=active ohci-usb=active stability-monitor=active stability-load=active systemd-networkd=active 

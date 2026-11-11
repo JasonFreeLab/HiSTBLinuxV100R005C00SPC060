@@ -1,0 +1,57 @@
+===== 验收时间: Mon Jul 27 20:45:55 UTC 2026
+--- 1. 系统
+Linux hi3798mv300 7.3.0 #144 SMP PREEMPT Sun Nov  1 10:08:07 CST 2026 aarch64 GNU/Linux
+PRETTY_NAME="Ubuntu 26.04.1 LTS"
+NAME="Ubuntu"
+ 20:45:55 up 1 min,  1 user,  load average: 0.75, 0.53, 0.21
+4
+--- 2. 显示/桌面
+active
+active
+by-path
+card0
+card1
+renderD128
+[   20.540651] hi3798-drm f8cc0000.display: hi3798-drm: set mode 1920x1080@60 (clock 148500 kHz, htotal 2200 vtotal 1125, VDP ID 00000000)
+[   20.565434] hi3798-drm f8cc0000.display: hi3798-drm: scanout enabled 1920x1080 addr 2f500000 pitch 7680
+--- 3. 网络
+eth0             UP             192.168.2.10/24 
+2 packets transmitted, 2 received, 0% packet loss, time 1023ms
+rtt min/avg/max/mdev = 0.701/0.788/0.875/0.087 ms
+--- 4. 远程
+active
+active
+LISTEN 0      50           0.0.0.0:445       0.0.0.0:*   
+LISTEN 0      10           0.0.0.0:3389      0.0.0.0:*   
+LISTEN 0      4096         0.0.0.0:22        0.0.0.0:*   
+--- 5. USB存储
+NAME          SIZE FSTYPE MOUNTPOINT
+sda          57.8G        
+└─sda1       57.8G exfat  /mnt/usb
+mmcblk0       7.3G        
+└─mmcblk0p1     7G ext4   /
+mmcblk0boot0    4M        
+System Volume Information
+hfvna
+test_hi3798.txt
+--- 6. WiFi
+mmc0
+mmc1
+Not connected.
+89
+[    7.660895] rtw88_8822bs mmc1:0001:1: Firmware version 30.20.0, H2C version 14
+--- 7. 音频AIAO
+[    0.153102] AIAO-DBG after: ok=1 crg118=00020101 status=00000001 ver=20130516 cap=03070001
+--- 8. GPU/DRM
+DRIVER=hi3798-drm
+card0
+card0-HDMI-A-1
+card1
+renderD128
+version
+--- 9. 服务
+  UNIT               LOAD   ACTIVE SUB    DESCRIPTION
+● multipathd.service loaded failed failed Device-Mapper Multipath Device Controller
+
+Legend: LOAD   → Reflects whether the unit definition was properly loaded.
+        ACTIVE → The high-level unit activation state, i.e. generalization of SUB.

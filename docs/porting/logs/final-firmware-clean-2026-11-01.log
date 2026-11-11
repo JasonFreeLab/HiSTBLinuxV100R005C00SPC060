@@ -1,0 +1,7 @@
+=== 最终干净固件验证 Sun Nov  1 12:05:30 CST 2026
+LIMA-DBG=0 DBG-gpu=0 AIAO=2 oops=0
+/dev/gpiochip0
+/dev/i2c-0
+/dev/watchdog0
+active active active active active 
+===== 结果: PASS=20 WARN=0 FAIL=0 =====

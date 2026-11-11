@@ -1,0 +1,112 @@
+#!/bin/bash
+# hi_png —— PNG 解码入口（硬件优先；PNG 全硬件整幅解码已打通，默认不做软件兜底）
+#
+# 用法：hi_png [--mode auto|hw|sw|probe] [--outfmt FMT] [--json] <in.png> <out.raw>
+#   auto/hw → 硬件 PNGD（hi_png_hw，/dev/hi_png）；**失败即失败，不回落软件**
+#   sw      → 软件（ffmpeg，仅供诊断/参考；非产品路径）
+#   probe   → 只解析 IHDR，不触碰硬件
+#   --outfmt 可显式指定 hi_png_hw 输出格式（rgb24|rgba8|gray8|gray16|rgb48），
+#            缺省按 IHDR 选择：gray8/gray16/rgb24/rgb48/rgba8（palette 有 tRNS 时 rgba8）
+# 退出码：0=成功；2=用法错误；3=非 PNG/硬件不可用/格式不支持；4=解码失败
+# 最后一行固定输出：HI_PNG fmt=png sub=<色型><位深> path=hw|sw|probe|none w=.. h=.. pix=.. ms=.. rc=..
+# 依赖：/root/m2/hi_png_hw（aarch64 静态，硬件路径）；hi_mmz_shim + hi_png 模块已加载。
+# JPEG 请用 hi_jpeg。
+
+set -u
+MODE=auto; JSON=0; OUTFMT=""
+HI_DIR=${HI_DIR:-/root/m2}
+usage() { echo "usage: hi_png [--mode auto|hw|sw|probe] [--outfmt rgb24|rgba8|gray8|gray16|rgb48] [--json] IN OUT" >&2; exit 2; }
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --mode) [ "$#" -ge 2 ] || usage; MODE="$2"; shift 2 ;;
+    --outfmt) [ "$#" -ge 2 ] || usage; OUTFMT="$2"; shift 2 ;;
+    --json) JSON=1; shift ;;
+    --) shift; break ;;
+    -*) usage ;;
+    *) break ;;
+  esac
+done
+case "$MODE" in auto|hw|sw|probe) ;; *) echo "hi_png: bad --mode $MODE" >&2; exit 2 ;; esac
+if [ "$MODE" = probe ]; then [ "$#" -ge 1 ] || usage; else [ "$#" -eq 2 ] || usage; fi
+IN=$(readlink -f "$1"); OUT=$(readlink -m "${2:-/dev/null}")
+[ -r "$IN" ] || { echo "hi_png: cannot read $IN" >&2; exit 2; }
+
+# 解析 IHDR（+ 是否有 tRNS/PLTE）：色型/位深/尺寸
+read -r SUB W H CT BD TRNS < <(python3 - "$IN" <<'PY'
+import struct, sys
+try:
+    f = open(sys.argv[1], "rb"); d = f.read()
+except OSError:
+    print("notpng 0 0 0 0 0"); sys.exit()
+if len(d) < 33 or d[:8] != b"\x89PNG\r\n\x1a\n" or d[12:16] != b"IHDR":
+    print("notpng 0 0 0 0 0"); sys.exit()
+w, h, bit, ct = struct.unpack(">IIBB", d[16:26])
+names = {0: "gray", 2: "rgb", 3: "palette", 4: "gray_a", 6: "rgba"}
+# walk chunks to detect PLTE/tRNS (tRNS length may be > 0, e.g. palette)
+trns = 0; plte = 0
+i = 8
+while i + 12 <= len(d) and i < 1 << 20:
+    ln = struct.unpack(">I", d[i:i+4])[0]
+    tp = d[i+4:i+8]
+    if tp == b"tRNS": trns = 1
+    if tp == b"PLTE": plte = 1
+    if tp == b"IDAT" or tp == b"IEND": break
+    i += 12 + ln
+print(f"{names.get(ct, 'ct%d' % ct)}{bit}", w, h, ct, bit, trns)
+PY
+)
+
+PATH_USED=none; RC=0; PIX=""
+t0=$(date +%s%N)
+
+report() {
+  local ms=$(( ($(date +%s%N) - t0) / 1000000 ))
+  [ "$JSON" = 1 ] && printf '{"fmt":"png","sub":"%s","path":"%s","w":%s,"h":%s,"pix":"%s","ms":%s,"rc":%s,"out":"%s"}\n' \
+    "$SUB" "$PATH_USED" "$W" "$H" "$PIX" "$ms" "$RC" "$OUT"
+  echo "HI_PNG fmt=png sub=$SUB path=$PATH_USED w=$W h=$H pix=$PIX ms=$ms rc=$RC"
+  exit "$RC"
+}
+
+[ "$SUB" = notpng ] && { RC=3; report; }
+[ "$MODE" = probe ] && { PATH_USED="probe"; RC=0; report; }
+
+# 缺省输出格式（与 hi_png_hw 的 hw 输出一致）
+if [ -z "$OUTFMT" ]; then
+  case "$CT" in
+    0) [ "$BD" = 16 ] && OUTFMT=gray16 || OUTFMT=gray8 ;;
+    2) [ "$BD" = 16 ] && OUTFMT=rgb48 || OUTFMT=rgb24 ;;
+    3) [ "$TRNS" = 1 ] && OUTFMT=rgba8 || OUTFMT=rgb24 ;;
+    4|6) OUTFMT=rgba8 ;;
+    *) OUTFMT=rgb24 ;;
+  esac
+fi
+case "$OUTFMT" in rgb24|rgba8) PIX=rgb24 ;; gray8) PIX=gray8 ;; gray16) PIX=gray16 ;; rgb48) PIX=rgb48 ;; *) PIX=$OUTFMT ;; esac
+[ "$OUTFMT" = rgba8 ] && PIX=rgba8
+
+if [ "$MODE" = hw ] || [ "$MODE" = auto ]; then
+  if [ -d /sys/module/hi_png ] && [ -c /dev/hi_png ] && [ -x "$HI_DIR/hi_png_hw" ]; then
+    PATH_USED=hw
+    TMPLOG=$(mktemp)
+    "$HI_DIR/hi_png_hw" --outfmt "$OUTFMT" "$IN" "$OUT" >"$TMPLOG" 2>&1 </dev/null
+    RC=$?
+    [ "$JSON" = 1 ] && [ "$RC" -ne 0 ] && cat "$TMPLOG" >&2
+    # 保留"不支持"(3) 与"解码失败"(其它) 的区分；不做软件兜底
+    case "$RC" in 0) ;; 3) ;; *) RC=4 ;; esac
+    rm -f "$TMPLOG"
+  else
+    # 不回落软件：硬件不可用即失败（用户要求"不需要软件兜底"）
+    RC=3
+  fi
+else
+  PATH_USED=sw
+  case "$OUTFMT" in
+    rgba8) SWPIX=rgba ;;
+    gray16) SWPIX=gray16le ;;
+    rgb48) SWPIX=rgb48le ;;
+    gray8) SWPIX=gray ;;
+    *) SWPIX=rgb24 ;;
+  esac
+  timeout 120 ffmpeg -v error -y -i "$IN" -frames:v 1 -pix_fmt "$SWPIX" -f rawvideo "$OUT" </dev/null
+  RC=$?; [ "$RC" -ne 0 ] && RC=4
+fi
+report

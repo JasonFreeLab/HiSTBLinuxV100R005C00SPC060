@@ -1,0 +1,41 @@
+A1=Module Name | B1=Base Address | C1=Normal Boot | D1=Standby Wakeup | E1=Normal Chip | F1=CA Chip | G1=Module Type
+A2=crg_ctrl | B2=0xf8a22000 | C2=Y | D2=Y | E2=Y | F2=Y | G2=0-NORMAL
+A3=Register | B3=Offset Address | C3=Value Written to or Read from Register | D3=delay | E3=read or write | F3= Bits to Be Read or Written | G3=Start Bit to Be Read or Written
+A4=I2C | B4=0x6c | C4=0x2220 | D4=0 | E4=write | F4=31 | G4=0 | H4=I2C Clock Off and reset
+A5=SSP | B5=0x70 | C5=0x2 | D5=0 | E5=write | F5=31 | G5=0 | H5=SSP Clock Off and reset
+A6=SCI | B6=0x74 | C6=0xa | D6=0 | E6=write | F6=31 | G6=0 | H6=SCI Clock Off and reset
+A7=VDH | B7=0x78 | C7=0x70 | D7=0 | E7=write | F7=31 | G7=0 | H7=VDH0 Clock Off and reset
+A8=JPGD | B8=0x7c | C8=0x10 | D8=0 | E8=write | F8=31 | G8=0 | H8=JPGD Clock Off and reset
+A9=PGD | B9=0x84 | C9=0x10 | D9=0 | E9=write | F9=31 | G9=0 | H9=PGD Clock Off and reset
+A10=BPD | B10=0x88 | C10=0x10 | D10=0 | E10=write | F10=31 | G10=0 | H10=BPD Clock Off and reset
+A11=VENC | B11=0x8c | C11=0x10 | D11=0 | E11=write | F11=31 | G11=0 | H11=VEDU Clock Off and reset
+A12=JPGE | B12=0x90 | C12=0x10 | D12=0 | E12=write | F12=31 | G12=0 | H12=JPGE clock off and reset
+A13=TDE | B13=0x94 | C13=0x10 | D13=0 | E13=write | F13=31 | G13=0 | H13=TDE Clock Off and reset
+A14=SDIO0 | B14=0x9c | C14=0x310 | D14=0 | E14=write | F14=31 | G14=0 | H14=SDIO0 Clock Off and reset
+A15=EMMC | B15=0xa0 | C15=0x210 | D15=0 | E15=write | F15=31 | G15=0
+A16=SATACTRL | B16=0xa8 | C16=0xf00 | D16=0 | E16=write | F16=31 | G16=0 | H16=SATACTRL clock off and reset
+A17=USB3CTRL | B17=0xb0 | C17=0x1000 | D17=0 | E17=write | F17=31 | G17=0 | H17=USB3CTRL clock off and reset
+A18=GSF | B18=0xcc | C18=0x25 | D18=0 | E18=write | F18=31 | G18=0
+A19=ETH | B19=0xd0 | C19=0x0 | D19=0 | E19=write | F19=31 | G19=0
+A20=GPU | B20=0xd4 | C20=0x10 | D20=0 | E20=write | F20=31 | G20=0 | H20=GPU Clock Off and reset
+A21=VDP1 | B21=0xd8 | C21=0x40000000 | D21=0 | E21=write | F21=31 | G21=0 | H21=VDP Clock Off and reset
+A22=VPSS | B22=0xf0 | C22=0x10 | D22=0 | E22=write | F22=31 | G22=0 | H22=VPSS Clock Off and reset
+A23=PVR | B23=0xfc | C23=0x1000000 | D23=0 | E23=write | F23=31 | G23=0 | H23=PVR Clock Off and reset
+A24=HDMITXCTRL1 | B24=0x10c | C24=0x3c0 | D24=0 | E24=write | F24=31 | G24=0 | H24=HDMITXCTRL Clock Off and reset
+A25=HDMITXPHY | B25=0x110 | C25=0x30 | D25=0 | E25=write | F25=31 | G25=0 | H25=HDMITXPHY Clock Off and reset
+A26=ADAC | B26=0x114 | C26=0x10 | D26=0 | E26=write | F26=31 | G26=0 | H26=ADAC Clock Off and reset
+A27=AIAO | B27=0x118 | C27=0x10 | D27=0 | E27=write | F27=31 | G27=0 | H27=AIAO Clock Off and reset
+A28=VDAC | B28=0x11c | C28=0x0 | D28=0 | E28=write | F28=31 | G28=0 | H28=VDAC chop Clock Off and reset
+A29=COMBOPHY | B29=0x188 | C29=0x10 | D29=0 | E29=write | F29=31 | G29=0 | H29=COMBOPHY Clock Off and reset
+A30=PCIECTRL | B30=0x18c | C30=0x70 | D30=0 | E30=write | F30=31 | G30=0 | H30=PCIECTRL Clock Off and reset
+A31=SDIO1 | B31=0x28c | C31=0x310 | D31=0 | E31=write | F31=31 | G31=0 | H31=SDIO1 Clock Off and reset
+A32=VDP2 | B32=0x34c | C32=0x20000000 | D32=0 | E32=write | F32=31 | G32=0 | H32=VDP all Layer Clock Off 
+A33=FEPHY | B33=0x388 | C33=0x10 | D33=0 | E33=write | F33=31 | G33=0
+A34=DMAC | B34=0x38c | C34=0x10 | D34=0 | E34=write | F34=31 | G34=0
+A35=GZIP | B35=0x390 | C35=0x10 | D35=0 | E35=write | F35=31 | G35=0
+A36=VENC SMMU | B36=0x032c | C36=0x10 | D36=0 | E36=write | F36=31 | G36=0
+A37=TDE SMMU | B37=0x0330 | C37=0x10 | D37=0 | E37=write | F37=31 | G37=0
+A38=JPGD SMMU | B38=0x0334 | C38=0x10 | D38=0 | E38=write | F38=31 | G38=0
+A39=VDH SMMU | B39=0x033c | C39=0x10 | D39=0 | E39=write | F39=31 | G39=0
+A40=PGD SMMU | B40=0x0348 | C40=0x10 | D40=0 | E40=write | F40=31 | G40=0
+A41=CIPHER SMMU | B41=0x0378 | C41=0x10 | D41=0 | E41=write | F41=31 | G41=0

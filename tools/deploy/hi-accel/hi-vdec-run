@@ -1,0 +1,93 @@
+#!/bin/bash
+# hi-vdec-run —— VDEC-02C：VDEC 解码自愈包装
+#
+# 用法：hi-vdec-run [--tries N] [--delay S] [--timeout S] [--quiet] -- <vdec_spec_hevc_head 参数...>
+#   例：hi-vdec-run --tries 3 -- hevc 4k 4k60.hevc 4k60.index 3840 2160 60
+#
+# 判定（与 hwtest parse_case 判据一致）：RESULT JSON 中 received==expected 且 capture_errors==0。
+#   注意：工具在 pts_errors>0 时 EXIT status=1 但帧已全部交付，不能用退出码判定。
+# 失败时：等待 delay 秒后重开进程（新进程 = 新通道 close/open + 从首个 IDR 重新喂流），最多 tries 次。
+# 每次尝试写一行 TSV 到 /var/log/hi-vdec-run/attempts.tsv；最终仍失败则落取证包（日志 + dmesg）。
+# 退出码：0=成功（含重试后成功），1=重试耗尽，2=用法错误。
+
+set -u
+TRIES=3; DELAY=2; TMO=180; QUIET=0
+HI_DIR=${HI_DIR:-/root/m2}
+TOOL=${HI_VDEC_TOOL:-vdec_spec_hevc_head}
+BUF_MB=${VDEC_BUF_MB:-8}
+LOGDIR=/var/log/hi-vdec-run
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --tries) TRIES="$2"; shift 2 ;;
+    --delay) DELAY="$2"; shift 2 ;;
+    --timeout) TMO="$2"; shift 2 ;;
+    --quiet) QUIET=1; shift ;;
+    --) shift; break ;;
+    *) echo "usage: hi-vdec-run [--tries N] [--delay S] [--timeout S] [--quiet] -- ARGS..." >&2; exit 2 ;;
+  esac
+done
+[ "$#" -gt 0 ] || { echo "hi-vdec-run: 缺少解码参数" >&2; exit 2; }
+case "$TRIES" in ''|*[!0-9]*) echo "hi-vdec-run: --tries 需为正整数" >&2; exit 2 ;; esac
+[ "$TRIES" -ge 1 ] || TRIES=1
+
+mkdir -p "$LOGDIR"
+TSV="$LOGDIR/attempts.tsv"
+[ -s "$TSV" ] || printf 'time\tboot\tattempt\ttries\trc\treceived\texpected\tcapture_errors\tfps\tverdict\targs\n' > "$TSV"
+BOOT=$(cut -c1-8 /proc/sys/kernel/random/boot_id)
+WORK=$(mktemp -d /tmp/hi-vdec-run.XXXXXX)
+trap 'rm -rf "$WORK"' EXIT
+
+say() { [ "$QUIET" = 1 ] || echo "$@"; }
+
+# 从日志最后一行 RESULT {...} 提取字段：received expected capture_errors output_fps
+parse() {
+  python3 - "$1" <<'PY'
+import json, sys
+res = None
+with open(sys.argv[1], errors="replace") as f:
+    for line in f:
+        if line.startswith("RESULT "):
+            try:
+                res = json.loads(line[7:])
+            except ValueError:
+                pass
+if res is None:
+    print("-1 -1 -1 0")
+else:
+    print(res.get("received", -1), res.get("expected", -1),
+          res.get("capture_errors", -1), res.get("output_fps", 0))
+PY
+}
+
+attempt=1
+while [ "$attempt" -le "$TRIES" ]; do
+  log="$WORK/attempt-$attempt.log"
+  ( cd "$HI_DIR" && VDEC_BUF_MB="$BUF_MB" timeout "$TMO" "./$TOOL" "$@" ) >"$log" 2>&1
+  rc=$?
+  read -r recv exp cerr fps < <(parse "$log")
+  verdict=FAIL
+  if [ "$recv" -ge 1 ] 2>/dev/null && [ "$recv" = "$exp" ] && [ "$cerr" = 0 ]; then verdict=PASS; fi
+  printf '%s\t%s\t%d\t%d\t%d\t%s\t%s\t%s\t%s\t%s\t%s\n' "$(date '+%F %T')" "$BOOT" \
+    "$attempt" "$TRIES" "$rc" "$recv" "$exp" "$cerr" "$fps" "$verdict" "$*" >> "$TSV"
+  say "hi-vdec-run attempt $attempt/$TRIES: $verdict received=$recv/$exp capture_errors=$cerr fps=$fps rc=$rc"
+  if [ "$verdict" = PASS ]; then
+    [ "$QUIET" = 1 ] || grep -E '^(RESULT|OUTPUT|EXIT) ' "$log"
+    echo "HI_VDEC_RUN verdict=PASS attempts=$attempt retried=$((attempt-1))"
+    exit 0
+  fi
+  # rc=124 为外层超时：确认进程已退出再重试，避免旧通道未释放
+  pkill -f "./$TOOL" 2>/dev/null
+  attempt=$((attempt+1))
+  [ "$attempt" -le "$TRIES" ] && sleep "$DELAY"
+done
+
+# 重试耗尽：落取证包
+ev="$LOGDIR/fail-$(date +%Y%m%d-%H%M%S)-$BOOT"
+mkdir -p "$ev"
+cp "$WORK"/attempt-*.log "$ev/" 2>/dev/null
+dmesg | tail -200 > "$ev/dmesg.txt"
+grep -E '^(CmaFree|MemFree|MemAvailable):' /proc/meminfo > "$ev/meminfo.txt"
+cat /proc/interrupts > "$ev/interrupts.txt" 2>/dev/null
+echo "HI_VDEC_RUN verdict=FAIL attempts=$TRIES evidence=$ev"
+exit 1

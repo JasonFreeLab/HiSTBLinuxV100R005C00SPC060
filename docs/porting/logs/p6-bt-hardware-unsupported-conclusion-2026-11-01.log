@@ -1,0 +1,13 @@
+=== 结论: M301H(2018) 蓝牙硬件支持判定 Mon Nov  2 00:29:30 CST 2026
+证据链:
+1) 用户提供的原厂固件 log (M301H_UM9_GD50):
+   - 仅加载 USB 蓝牙驱动: rtk_btusb / BTMTK
+   - 无 hci_uart / rtk_hciattach / hci0 / UART 蓝牙初始化
+   - 无 USB 蓝牙设备枚举记录
+2) 本板 Linux 实测:
+   - 模组 FG6222BSRB (RTL8822BS SDIO WiFi): UART BT 引脚全部连通、供电正常，
+     但对 H4/H5/各波特率/SDK 原版 rtk_hciattach 均无任何响应（无启动输出）
+   - USB 总线无蓝牙设备（lsusb 仅 U盘/鼠标）
+3) 该模组规格书: BT 为 UART 接口（pin40-43）；原厂固件却不用 UART BT
+结论: M301H(2018, 南传) 大概率未装配/未启用 BT 硬件（与 SATA 类似）。
+      软件侧 BlueZ 栈已就绪；如需 BT 可使用标准 USB 蓝牙 dongle（btusb 即插即用）。

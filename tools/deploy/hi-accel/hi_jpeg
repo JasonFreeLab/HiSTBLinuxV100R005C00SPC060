@@ -1,0 +1,107 @@
+#!/bin/bash
+# hi_jpeg —— JPEG 解码入口（JPEG-05：SOF 预检 + 硬件/软件分派）
+#
+# 用法：hi_jpeg [--mode auto|hw|sw|probe] [--json] <in.jpg> <out.nv21>
+#   Baseline 4:2:0/4:2:2/4:4:4/gray 且 ≤HW_MAX_PIXELS → 硬件 JPEGD（jpeg_test_d09，需 hi_jpeg 模块），输出 NV21
+#     （D09 修复：HAL 按 CHIP_TYPE_hi3798mv300 构建；YUV400 分配真实 UV 平面并填 0x80；
+#      只分配 Y+UV 两个平面，64MP 不再把第三平面映射到物理 0）
+#   其它（progressive/440/411/超上限）→ 不送硬件；auto 回退软件（ffmpeg → NV21），hw 模式返回 3
+#   probe：只解析文件头，不触碰硬件
+# 退出码：0=成功；2=用法错误；3=非 JPEG / 格式不支持（hw 模式）；4=解码失败
+# 最后一行固定输出：HI_JPEG fmt=jpeg sub=... path=hw|sw|none w=.. h=.. ms=.. rc=..
+# PNG 请用 hi_png（JPEGD 与 PNGD 是两块独立 IP，入口分开）。
+
+set -u
+MODE=auto; JSON=0
+HI_DIR=${HI_DIR:-/root/m2}
+# 硬件路径像素上限：64MP（8000×8000）已在 5 模块共存下验证（D09，boot 3f42a7e7，162.6 ms ×3）。
+# 早先的挂板根因是第三平面分配失败 phy=0 后被映射，已在 jpeg_test_d09 修复。
+HW_MAX_PIXELS=${HI_JPEG_HW_MAX_PIXELS:-64000000}
+HW_TOOL=${HI_JPEG_HW_TOOL:-jpeg_test_d09}
+usage() { echo "usage: hi_jpeg [--mode auto|hw|sw|probe] [--json] IN OUT" >&2; exit 2; }
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --mode) [ "$#" -ge 2 ] || usage; MODE="$2"; shift 2 ;;
+    --json) JSON=1; shift ;;
+    --) shift; break ;;
+    -*) usage ;;
+    *) break ;;
+  esac
+done
+case "$MODE" in auto|hw|sw|probe) ;; *) echo "hi_jpeg: bad --mode $MODE" >&2; exit 2 ;; esac
+if [ "$MODE" = probe ]; then [ "$#" -ge 1 ] || usage; else [ "$#" -eq 2 ] || usage; fi
+IN=$(readlink -f "$1"); OUT=$(readlink -m "${2:-/dev/null}")
+[ -r "$IN" ] || { echo "hi_jpeg: cannot read $IN" >&2; exit 2; }
+
+# 解析 SOF：采样方式 + 尺寸（只读文件头）
+read -r SUB W H < <(python3 - "$IN" <<'PY'
+import struct, sys
+d = open(sys.argv[1], "rb").read(1 << 20)
+if d[:2] != b"\xff\xd8":
+    print("notjpeg", 0, 0); sys.exit()
+i = 2
+while i + 4 <= len(d):
+    if d[i] != 0xFF:
+        i += 1; continue
+    m = d[i + 1]
+    if m in (0xD8, 0x01, 0xFF) or 0xD0 <= m <= 0xD7:
+        i += 2; continue
+    ln = struct.unpack(">H", d[i + 2:i + 4])[0]
+    if m in (0xC0, 0xC1, 0xC2, 0xC3, 0xC5, 0xC6, 0xC7, 0xC9, 0xCA, 0xCB, 0xCD, 0xCE, 0xCF):
+        h, w, nc = struct.unpack(">HHB", d[i + 5:i + 10])
+        if nc == 1:
+            sub = "gray"
+        else:
+            f = [d[i + 10 + 3 * k + 1] for k in range(nc)]
+            hs, vs = f[0] >> 4, f[0] & 15
+            c = (f[1] >> 4, f[1] & 15)
+            ratio = (hs // max(c[0], 1), vs // max(c[1], 1))
+            sub = {(2, 2): "420", (2, 1): "422", (1, 1): "444", (1, 2): "440", (4, 1): "411"}.get(ratio, "other")
+        if m in (0xC2, 0xC6, 0xCA, 0xCE):
+            sub += "_progressive"
+        print(sub, w, h); sys.exit()
+    i += 2 + ln
+print("nosof", 0, 0)
+PY
+)
+
+HW_OK=0
+case "$SUB" in 420|422|444|gray) [ $((W * H)) -le "$HW_MAX_PIXELS" ] && HW_OK=1 ;; esac
+PATH_USED=none; RC=0
+t0=$(date +%s%N)
+
+report() {
+  local ms=$(( ($(date +%s%N) - t0) / 1000000 ))
+  [ "$JSON" = 1 ] && printf '{"fmt":"jpeg","sub":"%s","path":"%s","w":%s,"h":%s,"ms":%s,"rc":%s,"out":"%s"}\n' \
+    "$SUB" "$PATH_USED" "$W" "$H" "$ms" "$RC" "$OUT"
+  echo "HI_JPEG fmt=jpeg sub=$SUB path=$PATH_USED w=$W h=$H ms=$ms rc=$RC"
+  exit "$RC"
+}
+
+case "$SUB" in notjpeg|nosof) RC=3; report ;; esac
+
+if [ "$MODE" = probe ]; then
+  PATH_USED=$([ "$HW_OK" = 1 ] && echo "hw(probe)" || echo "sw(probe)"); report
+fi
+
+sw_decode() {
+  PATH_USED=sw
+  timeout 120 ffmpeg -v error -y -i "$IN" -frames:v 1 -pix_fmt nv21 -f rawvideo "$OUT" </dev/null
+  RC=$?; [ "$RC" -ne 0 ] && RC=4
+}
+
+if [ "$MODE" != sw ] && [ "$HW_OK" = 1 ] && [ -d /sys/module/hi_jpeg ]; then
+  PATH_USED=hw
+  log=$(mktemp /tmp/hi_jpeg.XXXXXX)
+  ( cd "$HI_DIR" && JPEG_ALLOW_GRAY=1 JPEG_DUMP=raw timeout 30 "./$HW_TOOL" "$IN" "$OUT" 1 ) >"$log" 2>&1
+  RC=$?
+  grep -q "completed=1/1" "$log" 2>/dev/null || RC=4
+  [ "$RC" -ne 0 ] && RC=4
+  rm -f "$log"
+  [ "$RC" -ne 0 ] && [ "$MODE" = auto ] && sw_decode
+elif [ "$MODE" = hw ]; then
+  RC=3   # 硬件不支持该采样/尺寸，或 hi_jpeg 未加载：拒绝送硬件
+else
+  sw_decode
+fi
+report

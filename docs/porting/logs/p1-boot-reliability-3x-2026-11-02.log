@@ -1,0 +1,13 @@
+=== 冷启动可靠性回归（3 次）Mon Nov  2 00:39:31 CST 2026
+测试方法: RTS 复位 → 串口捕获到 login: 计时 → SSH 检查
+结果:
+  boot1: OK 21.0s 无 oops
+  boot2: OK 20.6s 无 oops
+  boot3: OK 20.2s 无 oops
+成功率: 3/3 (100%)
+启动后状态:
+  aarch64, Linux 7.3.0
+  weston=active, stability-load=active
+  WiFi 已连接
+  验收 PASS=26 WARN=0 FAIL=0
+注: 该计时为"复位→login 提示"；早期记录的 16.5s 为内核启动到桌面/服务就绪，口径不同。

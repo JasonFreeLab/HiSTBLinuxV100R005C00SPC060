@@ -1,0 +1,17 @@
+# 验收件 sha1 清单（与 docs/porting/TOOL-MODULE-PAIRING.md 当前验收对一致）
+# 格式：<完整sha1>  <文件名（相对 HI_DIR）>
+1ad0d7c7d5e2ba7b9e74d5de50a2277407708a09  hi_mmz_shim.ko
+e88597910e2fa7e00972a25bccd3024ef1fac2fa  hi_vdec_reloadfix.ko
+0d95a512bff7ccbfc068f61aa99ca50b7e4dd7b8  hi_venc_venc06b.ko
+8f39ceb0f7b18d7e87b81c2cf44d0e4c2d7c0793  hi_jpeg_noext.ko
+1a4bc54b8c8553e3b39342825fa608f0a5f21700  hi_png_reload.ko
+6ada12501cd1225665ebe827db18728d00eb2228  vdec_spec_hevc_head
+d3c64680934bfa5afe133accde7898cc3148c9f0  jpeg_test_jpeg01
+d9959e17c0dc4cad2e8bc8e9634af1aff21006e9  jpeg_test_d09
+723a011bb102ab818c032c7830fad12ad772cba1  png_test8
+fd7b63cc4186f175eb33c556887772906bd8f03c  hi_png_hw
+a0458c9026e9ac7c748aed01b20fe8ea5fe12f07  encoder_accept10
+38bbbce8f357e11a46cc1e046c476ebbe7ef7965  ht1080b.hevc
+8bf424c738f0e02da8d7fea0d5b39973c73e283b  ht.index
+838adece9d3de0d2dd2c5daae26d046e11914eb6  hi_tde.ko
+6b32f2aca998271bedf022be8f245cda3799a1db  tde_test

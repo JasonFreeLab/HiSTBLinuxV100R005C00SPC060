@@ -1,0 +1,22 @@
+[Unit]
+Description=Hi3798MV300 hardware acceleration modules (VDEC/VENC/JPEG/PNG) + warmup + selftest
+Documentation=file:///etc/hi-accel.conf
+After=local-fs.target systemd-modules-load.service
+# 不阻塞桌面/SSH：放在 multi-user 里异步完成
+Before=stability-load.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/sbin/hi-accel-load.sh
+TimeoutStartSec=180
+# 卸载按依赖逆序；失败忽略（rmmod 已在 reloadfix/venc06b 上验证 ×10）
+ExecStop=-/sbin/rmmod hi_png
+ExecStop=-/sbin/rmmod hi_jpeg
+ExecStop=-/sbin/rmmod hi_venc
+ExecStop=-/sbin/rmmod hi_tde
+ExecStop=-/sbin/rmmod hi_vdec
+ExecStop=-/sbin/rmmod hi_mmz_shim
+
+[Install]
+WantedBy=multi-user.target

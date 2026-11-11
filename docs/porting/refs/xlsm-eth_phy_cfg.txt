@@ -1,0 +1,16 @@
+A1=Module Name | B1=Base Address | C1=Normal Boot | D1=Standby Wakeup | E1=Normal Chip | F1=CA Chip | G1=Module Type
+A2=eth_phy_cfg | B2=0xf8000000 | C2=Y | D2=Y | E2=Y | F2=Y | G2=0-NORMAL
+A3=Register | B3=Offset Address | C3=Value Written to or Read from Register | D3=delay | E3=read or write | F3= Bits to Be Read or Written | G3=Start Bit to Be Read or Written
+A4=MAC0_IF | B4=0x0 | C4=0x1 | D4=0 | E4=write | F4=1 | G4=6 | H4=MAC0 Select RGMII Interface (1-rgmii, 4-rmii)
+A5=FEPHY_ADDR | B5=0xA8 | C5=0x2 | D5=0 | E5=write | F5=7 | G5=0
+A6=MAC0_PHY_CTRL | B6=0xA8 | C6=0xff | D6=0 | E6=write | F6=7 | G6=8
+A7=MAC0_PHY_RST_GPIO | B7=0xAC | C7=0xff | D7=0 | E7=write | F7=7 | G7=0
+A8=MAC0_PHY_RST_GPIO_BIT | B8=0xAC | C8=0xff | D8=0 | E8=write | F8=7 | G8=8
+A9=GMAC_IF | B9=0x184300c | C9=0x0 | D9=0 | E9=write | F9=2 | G9=5 | H9=MAC0 Select RGMII Interface (1-rgmii, 4-rmii)
+A10=GMAC_PHY_ADDR | B10=0xA8 | C10=0xff | D10=0 | E10=write | F10=7 | G10=16 | H10=MAC0_PHY_ADDR = 0xff, range[1--31], fill 0xFF if not used
+A11=GMAC_PHY_CTRL | B11=0xA8 | C11=0x0 | D11=0 | E11=write | F11=7 | G11=24 | H11=MAC0_PHY_Select MDIO1/MDCK1;  0 or 1, fill 0xFF if not used
+A12=GMAC_PHY_RST_GPIO | B12=0xAC | C12=0xff | D12=0 | E12=write | F12=7 | G12=16 | H12=MAC0 PHY RST GPIO Group Num, fill 0xFF if not used
+A13=GMAC_PHY_RST_GPIO_BIT | B13=0xAC | C13=0xff | D13=0 | E13=write | F13=7 | G13=24 | H13=MAC0 PHY RST GPIO Bit Num, fill 0xFF if not used
+A14=PERI_SD_LDO | B14=0xa2011c | C14=0x6 | D14=0 | E14=write | F14=2 | G14=4 | H14=SDIO0_LDO: 110: 3V3 mode
+                       010: 1V8 mode
+default 3V3 mode

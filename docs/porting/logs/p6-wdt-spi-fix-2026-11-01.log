@@ -1,0 +1,10 @@
+=== WDT/SPI + 看门狗修复验证 Sun Nov  1 11:38:16 CST 2026
+ 20:50:41 up 6 min,  1 user,  load average: 1.88, 2.39, 1.25
+Jul 27 20:45:13 hi3798mv300 systemd[1]: Using hardware watchdog /dev/watchdog0: 'sp805-wdt', version 0.
+Jul 27 20:45:13 hi3798mv300 systemd[1]: Watchdog running with a hardware timeout of 30s.
+/dev/gpiochip0
+/dev/i2c-0
+/dev/watchdog0
+/sys/class/spi_master/spi0/uevent
+2026-07-27 20:49:13 up=314.58 load=4.59 2.87 1.27 memMB=269 faults=0 gpu_err=0 svc=active,active,active,active,active, wifi=Not connected.
+2026-07-27 20:50:13 up=374.72 load=2.31 2.52 1.26 memMB=237 faults=0 gpu_err=0 svc=active,active,active,active,active, wifi=Not connected.

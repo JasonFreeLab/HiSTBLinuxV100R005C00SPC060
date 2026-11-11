@@ -1,0 +1,7 @@
+B2=Boot V1.2.0
+B3=Hisilicon Technologies Co., Ltd. All rights reserved. @2014
+A6=Description:
+1. Click the button [ Generate ] will generate config file.
+A7=xls version | B7=v134
+A11=Version | B11=update description | C11=Author | D11=Date
+A12=V3.0.0 | B12=New create for sample test | C12=y00181465 | D12=2016.08.08

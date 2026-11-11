@@ -1,0 +1,27 @@
+A1=Module Name | B1=Base Address | C1=Normal Boot | D1=Standby Wakeup | E1=Normal Chip | F1=CA Chip | G1=Module Type
+A2=sysctrl | B2=0xf8000000 | C2=Y | D2=Y | E2=Y | F2=Y | G2=0-NORMAL
+A3=Register | B3=Offset Address | C3=Value Written to or Read from Register | D3=delay | E3=read or write | F3= Bits to Be Read or Written | G3=Start Bit to Be Read or Written
+A4=CORE_HPM_MAX_MIN | B4=0x98 | C4=0x01270118 | D4=0 | E4=write | F4=31 | G4=0 | H4=bit[31:16]: Core HPM Max(0x127); bit[15:0]: Core HPM Min(0x118)
+A5=CORE_FF_TT_SS_VOL | B5=0xc4 | C5=0x00a99989 | D5=0 | E5=write | F5=31 | G5=0 | H5=bit[31:16]: F3 Core Vol(0.83V);bit[15:8]: TT Core Vol(0.87V);bit[7:0]: SS Core Vol(0.91V)
+A6=CPU_TT_VOL | B6=0xc8 | C6=0x00312519 | D6=0 | E6=write | F6=31 | G6=0 | H6=bit[31]:SVB disable;bit[23:16]:FF CPU Vol(1.13V);bit[15:8]: TTCPU Core Vol(1.16V);bit[7:0]: SS CPU Vol(1.19V)
+A7=CTRL | B7=0x00 | C7=0x1 | D7=0 | E7=write | F7=31 | G7=0 | H7=Mcu Bus Clock Select 200M
+A8=MCU_CRG | B8=0x48 | C8=0x60001151 | D8=0 | E8=write | F8=31 | G8=0 | H8=bit[30]: LSADC CKEN
+bit[29]: UART0 Clock Sel 0: 3M; 1: 75M
+bit[12]: UART0 CKEN
+bit[8]: LEDC CKEN
+bit[6]: Timer01 CKEN
+bit[4]: IR CKEN
+bit[0]: MCU CKEN
+A9=EMMC_VOL | B9=0xf4 | C9=0x1 | D9=0 | E9=write | F9=0 | G9=0 | H9=bit[0]: 0: 3.3V; 1: 1.8V. Emmc IO Voltage select
+A10=PCB Layers | B10=0x94 | C10=0x0 | D10=0 | E10=write | F10=0 | G10=31 | H10=PCB layers: 0: 2layers
+                    1: 4/6 layers
+A11=DDR_TRAINING_CFG | B11=0xd0 | C11=0xffffffff | D11=0 | E11=write | F11=31 | G11=0 | H11=SC_GEN20[0]=0:  DDRPHY Software Train Enable
+SC_GEN20[4]=0:  Write Leveling Enable
+SC_GEN20[8]=0:  SW DQS Gating  Enable
+SC_GEN20[16]=0: DDR EYE Train Enable
+SC_GEN20[20]=0: HW rd deskew Enable | I11=sw train: 0xfefffffe
+A12=DDR0_HW_TRAINING_CFG | B12=0xf00 | C12=0x17fd | D12=0 | E12=write | F12=31 | G12=0 | H12=DDR0 HW Training config
+A13=clk_gpio5_3_drv | B13=0x44 | C13=0x0 | D13=0 | E13=write | F13=2 | G13=24 | H13=GPIO5_3 IO Drv 18mA
+A14=data_gpio5_0_drv | B14=0x44 | C14=0x0 | D14=0 | E14=write | F14=2 | G14=12 | H14=GPIO5_0 IO Drv 18mA
+A15=key_gpio5_1_drv | B15=0x44 | C15=0x0 | D15=0 | E15=write | F15=2 | G15=18 | H15=GPIO5_1 IO Drv 18mA
+A16=gpio5_4_drv | B16=0x5c | C16=0x0 | D16=0 | E16=write | F16=2 | G16=12 | H16=GPIO5_0 IO Drv 18mA
